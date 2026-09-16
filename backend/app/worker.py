@@ -420,8 +420,16 @@ def receive_delivery_events():
         QueueUrl=settings().event_queue_url, MaxNumberOfMessages=10, WaitTimeSeconds=1
     ).get("Messages", []):
         envelope = json.loads(message["Body"])
+        # SES publishes this plain-text setup notification before JSON events.
+        # The queue policy admits only our SES SNS topic; acknowledge this exact
+        # control message without associating it with a customer delivery.
+        if envelope.get("Message") == "Successfully validated SNS topic for Amazon SES event publishing.":
+            sqs.delete_message(QueueUrl=settings().event_queue_url, ReceiptHandle=message["ReceiptHandle"])
+            continue
         event = json.loads(envelope["Message"]) if "Message" in envelope else envelope
         provider_id = event.get("mail", {}).get("messageId")
+        if not provider_id:
+            raise ValueError("SES delivery event requires a provider message ID")
         kind = event.get("eventType", event.get("notificationType", "unknown")).lower()
         with SessionLocal.begin() as db:
             delivery = db.scalar(select(EmailDelivery).where(EmailDelivery.provider_id == provider_id))
@@ -436,9 +444,11 @@ def receive_delivery_events():
                         kind=kind,
                     )
                 )
-                delivery.status = {"bounce": "bounced", "complaint": "complained", "delivery": "delivered"}.get(
-                    kind, delivery.status
-                )
+                # Delayed/duplicate delivery events must never undo suppression.
+                if delivery.status not in {"bounced", "complained"}:
+                    delivery.status = {"bounce": "bounced", "complaint": "complained", "delivery": "delivered"}.get(
+                        kind, delivery.status
+                    )
         sqs.delete_message(QueueUrl=settings().event_queue_url, ReceiptHandle=message["ReceiptHandle"])
 
 
