@@ -17,7 +17,7 @@ All stages passed:
 7. Recording manifest finalization, real Groq reports, evidence validation and isolation of manager-only notes from candidate feedback.
 8. Separate candidate and manager report notifications accepted by SES.
 
-The synthetic application expires after one day. The runner prints stage names/identifiers, never passwords, signed URLs, invitation tokens or transcripts. It retrieves simulator-only OTPs from its own organization's encrypted outbox. This proves provider acceptance and the application's pipeline; it does not prove inbox delivery to a real candidate.
+The acceptance runner initially expires its synthetic application after one day. At the owner's request for a populated test login, this completed sample was retained until 16 October 2026 and made available in Talyn Demo Workspace through a separate recruiter account; credentials are kept outside Git. The runner prints stage names/identifiers, never passwords, signed URLs, invitation tokens or transcripts. It retrieves simulator-only OTPs from its own organization's encrypted outbox. This proves provider acceptance and the application's pipeline; it does not prove inbox delivery to a real candidate.
 
 ## Browser and infrastructure checks
 
