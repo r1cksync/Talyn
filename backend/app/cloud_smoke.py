@@ -13,7 +13,7 @@ import re
 import subprocess
 import tempfile
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import httpx
@@ -223,9 +223,8 @@ def main():
             if uploaded.status_code != 200:
                 raise RuntimeError("Signed S3 recording upload failed")
             call(candidate, "POST", f"/candidate/recordings/{obj['id']}/complete")
-            result = candidate.post(
-                "/api/candidate/frames", content=frame.read_bytes(), headers={"Content-Type": "image/jpeg"}
-            )
+            frame_data = frame.read_bytes()
+            result = candidate.post("/api/candidate/frames", content=frame_data, headers={"Content-Type": "image/jpeg"})
             if result.status_code != 202:
                 raise RuntimeError("Synthetic frame upload failed")
 
@@ -239,7 +238,50 @@ def main():
         with speech["AudioStream"] as stream:
             audio = stream.read()
 
-        async def answer():
+        recording_count = 1
+        probe_count = 0
+        started_at = datetime.fromisoformat(state["started_at"])
+        last_clip, last_frame = time.monotonic(), time.monotonic()
+
+        def probe_uploads():
+            nonlocal recording_count, probe_count, last_clip, last_frame
+            # Exercise the same row locks and S3 operations as the browser while audio is live.
+            response = candidate.get("/api/candidate/session", timeout=5)
+            if response.status_code != 200 or response.json()["status"] != "active":
+                raise RuntimeError("Live session polling stalled during audio")
+            if candidate.get("/api/health", timeout=5).status_code != 200:
+                raise RuntimeError("API health stalled during audio")
+            probe_count += 1
+            if time.monotonic() - last_clip >= 10:
+                offset = int((now() - started_at).total_seconds() * 1000)
+                obj = call(
+                    candidate,
+                    "POST",
+                    "/candidate/recordings",
+                    {
+                        "sequence": recording_count,
+                        "sha256": hashlib.sha256(media).hexdigest(),
+                        "size": len(media),
+                        "content_type": "video/webm",
+                        "start_ms": max(0, offset - 2000),
+                        "end_ms": offset,
+                    },
+                )
+                uploaded = httpx.put(obj["upload"]["url"], headers=obj["upload"]["headers"], content=media, timeout=30)
+                if uploaded.status_code != 200:
+                    raise RuntimeError("Concurrent S3 recording upload failed")
+                call(candidate, "POST", f"/candidate/recordings/{obj['id']}/complete")
+                recording_count += 1
+                last_clip = time.monotonic()
+            if time.monotonic() - last_frame >= 30:
+                response = candidate.post(
+                    "/api/candidate/frames", content=frame_data, headers={"Content-Type": "image/jpeg"}, timeout=10
+                )
+                if response.status_code != 202:
+                    raise RuntimeError("Concurrent frame upload failed")
+                last_frame = time.monotonic()
+
+        async def answer(minimum_seconds=0):
             url = base.replace("https://", "wss://") + "/api/candidate/audio"
             cookie = "; ".join(f"{c.name}={c.value}" for c in candidate.cookies.jar)
             async with websockets.connect(
@@ -249,12 +291,23 @@ def main():
                 if json.loads(await socket.recv())["type"] != "ready":
                     raise RuntimeError("Streaming handshake failed")
                 finals = []
+                stopped = asyncio.Event()
 
                 async def send():
-                    for offset in range(0, len(audio), 3200):
-                        await socket.send(audio[offset : offset + 3200])
+                    samples = audio + bytes(max(0, minimum_seconds * 32000 - len(audio)))
+                    for offset in range(0, len(samples), 3200):
+                        await socket.send(samples[offset : offset + 3200])
                         await asyncio.sleep(0.1)
                     await socket.send(json.dumps({"type": "stop"}))
+                    stopped.set()
+
+                async def probe():
+                    while not stopped.is_set():
+                        await asyncio.to_thread(probe_uploads)
+                        try:
+                            await asyncio.wait_for(stopped.wait(), 2)
+                        except asyncio.TimeoutError:
+                            pass
 
                 async def receive():
                     async for message in socket:
@@ -266,7 +319,7 @@ def main():
                         if data["type"] == "error":
                             raise RuntimeError("Streaming provider returned an error")
 
-                await asyncio.wait_for(asyncio.gather(send(), receive()), 75)
+                await asyncio.wait_for(asyncio.gather(send(), receive(), probe()), 100)
                 if not finals:
                     raise RuntimeError("No final transcript arrived")
 
@@ -276,10 +329,13 @@ def main():
             question = call(candidate, "GET", "/candidate/speech")
             if httpx.get(question["url"], timeout=30).status_code != 200:
                 raise RuntimeError("Polly S3 playback URL failed")
-            asyncio.run(answer())
+            asyncio.run(answer(minimum_seconds=65 if turn == 0 else 0))
             state = call(candidate, "POST", "/candidate/turn", {"turn": state["turn"]})
         call(candidate, "POST", "/candidate/finish")
         passed("public_websocket_pcm_transcribe_polly_interview")
+        if probe_count < 15 or recording_count < 5:
+            raise RuntimeError("Concurrent audio/upload check did not run long enough")
+        passed("sustained_audio_concurrent_recordings_frames_and_http")
 
         def frame_processed():
             with SessionLocal() as db:
@@ -291,9 +347,9 @@ def main():
         wait_for(frame_processed)
         passed("rekognition_synthetic_frame_processed")
         wait_for(
-            lambda: call(candidate, "POST", "/candidate/recordings/finalize-manifest", {"expected_clips": 1})[
-                "finalized"
-            ]
+            lambda: call(
+                candidate, "POST", "/candidate/recordings/finalize-manifest", {"expected_clips": recording_count}
+            )["finalized"]
         )
 
         def report_ready():

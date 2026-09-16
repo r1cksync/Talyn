@@ -29,20 +29,25 @@ async def audio_stream(ws: WebSocket):
     sid, oid, aid = None, None, None
     started = now()
     try:
-        with SessionLocal() as db:
-            auth = session_from_token(db, ws.cookies.get("talyn_candidate"), "candidate")
-            app = db.get(Application, auth.application_id)
-            if not app or app.revoked or app.org_id != auth.org_id:
-                raise ValueError("Access revoked")
-            session = db.scalar(
-                select(InterviewSession).where(
-                    InterviewSession.application_id == app.id, InterviewSession.org_id == auth.org_id
+        # Row-lock waits must not block the event loop that releases HTTP transactions.
+        def authenticate():
+            with SessionLocal() as db:
+                auth = session_from_token(db, ws.cookies.get("talyn_candidate"), "candidate")
+                app = db.get(Application, auth.application_id)
+                if not app or app.revoked or app.org_id != auth.org_id:
+                    raise ValueError("Access revoked")
+                session = db.scalar(
+                    select(InterviewSession).where(
+                        InterviewSession.application_id == app.id, InterviewSession.org_id == auth.org_id
+                    )
                 )
-            )
-            if not session or session.status != "active" or aware(session.deadline_at) <= now():
-                raise ValueError("No active interview")
-            sid, oid, aid = session.id, session.org_id, session.application_id
-            csrf, expires = auth.csrf, aware(auth.expires_at)
+                if not session or session.status != "active" or aware(session.deadline_at) <= now():
+                    raise ValueError("No active interview")
+                sid, oid, aid = session.id, session.org_id, session.application_id
+                csrf, expires = auth.csrf, aware(auth.expires_at)
+                return sid, oid, aid, csrf, expires
+
+        sid, oid, aid, csrf, expires = await asyncio.to_thread(authenticate)
         await ws.accept()
         hello = await asyncio.wait_for(ws.receive_json(), 10)
         if (
@@ -51,13 +56,18 @@ async def audio_stream(ws: WebSocket):
             or not secrets.compare_digest(hello.get("csrf", ""), csrf)
         ):
             raise ValueError("Invalid stream handshake")
-        with SessionLocal.begin() as db:
-            session = db.scalar(select(InterviewSession).where(InterviewSession.id == sid).with_for_update())
-            if session.connection_id and aware(session.connection_until) > now():
-                raise ValueError("Another audio stream is active")
-            session.connection_id, session.connection_until = connection_id, now() + timedelta(seconds=30)
-            offset_ms = max(0, int((now() - aware(session.started_at)).total_seconds() * 1000))
-            turn = session.turn
+
+        def claim_connection():
+            with SessionLocal.begin() as db:
+                session = db.scalar(select(InterviewSession).where(InterviewSession.id == sid).with_for_update())
+                if session.connection_id and aware(session.connection_until) > now():
+                    raise ValueError("Another audio stream is active")
+                session.connection_id, session.connection_until = connection_id, now() + timedelta(seconds=30)
+                offset_ms = max(0, int((now() - aware(session.started_at)).total_seconds() * 1000))
+                turn = session.turn
+                return offset_ms, turn
+
+        offset_ms, turn = await asyncio.to_thread(claim_connection)
         client = TranscribeStreamingClient(region=settings().region)
         stream = await client.start_stream_transcription(
             language_code="en-US",
@@ -139,29 +149,39 @@ async def audio_stream(ws: WebSocket):
                 if control.get("type") == "ping":
                     await ws.send_json({"type": "pong", "server_time": now().isoformat()})
             if (now() - last_check).total_seconds() >= 5:
-                with SessionLocal.begin() as db:
-                    live = db.get(InterviewSession, sid)
-                    app = db.get(Application, aid)
-                    auth_check = session_from_token(db, ws.cookies.get("talyn_candidate"), "candidate")
-                    if (
-                        app.revoked
-                        or auth_check.revoked
-                        or live.status != "active"
-                        or aware(live.deadline_at) <= now()
-                        or expires <= now()
-                    ):
-                        break
-                    live.connection_until = now() + timedelta(seconds=30)
+
+                def refresh_connection():
+                    with SessionLocal.begin() as db:
+                        live = db.get(InterviewSession, sid)
+                        app = db.get(Application, aid)
+                        auth_check = session_from_token(db, ws.cookies.get("talyn_candidate"), "candidate")
+                        if (
+                            app.revoked
+                            or auth_check.revoked
+                            or live.status != "active"
+                            or aware(live.deadline_at) <= now()
+                            or expires <= now()
+                        ):
+                            return False
+                        live.connection_until = now() + timedelta(seconds=30)
+                    return True
+
+                if not await asyncio.to_thread(refresh_connection):
+                    break
                 last_check = now()
         await stream.input_stream.end_stream()
         await asyncio.wait_for(consumer, 15)
+
         # Commit release before acknowledging stop so the HTTP turn request can proceed.
-        with SessionLocal.begin() as db:
-            db.execute(
-                update(InterviewSession)
-                .where(InterviewSession.id == sid, InterviewSession.connection_id == connection_id)
-                .values(connection_id=None, connection_until=None)
-            )
+        def release_connection():
+            with SessionLocal.begin() as db:
+                db.execute(
+                    update(InterviewSession)
+                    .where(InterviewSession.id == sid, InterviewSession.connection_id == connection_id)
+                    .values(connection_id=None, connection_until=None)
+                )
+
+        await asyncio.to_thread(release_connection)
         await ws.send_json({"type": "stopped"})
     except (WebSocketDisconnect, asyncio.TimeoutError):
         pass
@@ -185,20 +205,24 @@ async def audio_stream(ws: WebSocket):
             consumer.cancel()
             await asyncio.gather(consumer, return_exceptions=True)
         if sid:
-            with SessionLocal.begin() as db:
-                db.execute(
-                    update(InterviewSession)
-                    .where(InterviewSession.id == sid, InterviewSession.connection_id == connection_id)
-                    .values(connection_id=None, connection_until=None)
-                )
-                meter(
-                    db,
-                    oid,
-                    aid,
-                    "transcription_seconds",
-                    (now() - started).total_seconds(),
-                    "transcribe:" + connection_id,
-                )
+
+            def cleanup_connection():
+                with SessionLocal.begin() as db:
+                    db.execute(
+                        update(InterviewSession)
+                        .where(InterviewSession.id == sid, InterviewSession.connection_id == connection_id)
+                        .values(connection_id=None, connection_until=None)
+                    )
+                    meter(
+                        db,
+                        oid,
+                        aid,
+                        "transcription_seconds",
+                        (now() - started).total_seconds(),
+                        "transcribe:" + connection_id,
+                    )
+
+            await asyncio.to_thread(cleanup_connection)
         try:
             await ws.close()
         except Exception:

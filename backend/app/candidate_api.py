@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from pydantic import EmailStr
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -326,9 +326,11 @@ def recording_upload(data: ClipInput, auth=Depends(candidate), db: Session = Dep
     ):
         raise HTTPException(422, "Clip must contain at most 35 seconds of independently playable video")
     elapsed = int((now() - aware(session.started_at)).total_seconds() * 1000)
+    if session.completed_at:
+        elapsed = int((aware(session.completed_at) - aware(session.started_at)).total_seconds() * 1000)
     if data.end_ms > elapsed + 5000 or data.end_ms > 3660000:
         raise HTTPException(422, "Recording timestamps exceed the interview timeline")
-    if session.completed_at and now() - aware(session.completed_at) > timedelta(minutes=10):
+    if session.completed_at and now() - aware(session.completed_at) > timedelta(hours=24):
         raise HTTPException(409, "Recording upload window closed")
     manifest = db.scalar(
         select(RecordingManifest).where(
@@ -412,7 +414,12 @@ def recordings_status(auth=Depends(candidate), db: Session = Depends(get_db, sco
 
 
 @router.post("/frames", status_code=202)
-async def frame(request: Request, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
+# Parse the body before entering the worker thread; DB and S3 calls are synchronous.
+def frame(
+    data: bytes = Body(media_type="image/jpeg"),
+    auth=Depends(candidate),
+    db: Session = Depends(get_db, scope="function"),
+):
     session = current_session(db, auth, active=True)
     consent = db.scalar(
         select(Consent).where(Consent.application_id == auth.application_id, Consent.org_id == auth.org_id)
@@ -420,7 +427,6 @@ async def frame(request: Request, auth=Depends(candidate), db: Session = Depends
     if not consent or not consent.recording:
         raise HTTPException(403, "Recording consent required")
     rate_limit(db, "frame:" + session.id, 1, settings().frame_interval_seconds)
-    data = await request.body()
     if len(data) > 262144 or not data.startswith(b"\xff\xd8\xff"):
         raise HTTPException(422, "A JPEG frame under 256 KB is required")
     offset = max(0, int((now() - aware(session.started_at)).total_seconds() * 1000))

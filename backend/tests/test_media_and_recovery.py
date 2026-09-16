@@ -75,6 +75,50 @@ def test_clip_checksum_missing_sequence_and_decodable_playback(client, tmp_path)
         assert candidate.get(download).content == data
 
 
+def test_recording_recovery_window_preserves_closed_interview_timeline(client):
+    from datetime import timedelta
+    from app.models import InterviewSession, now
+
+    manager_login(client)
+    job_id, app_id = prepare(client, upload=False)
+    with TestClient(app) as candidate:
+        join(client, candidate, launch(client, job_id, app_id))
+        start(candidate)
+        candidate.post("/api/candidate/finish")
+        with SessionLocal.begin() as db:
+            session = db.scalar(select(InterviewSession).where(InterviewSession.application_id == app_id))
+            session.started_at = now() - timedelta(hours=1)
+            session.completed_at = session.started_at + timedelta(minutes=10)
+            sid = session.id
+        clip = {
+            "sequence": 0,
+            "sha256": hashlib.sha256(b"fixture").hexdigest(),
+            "size": 7,
+            "content_type": "video/webm",
+            "start_ms": 0,
+            "end_ms": 1000,
+        }
+        assert candidate.post("/api/candidate/recordings", json=clip).status_code == 201
+        # A longer recovery window does not allow new footage beyond the completed timeline.
+        assert (
+            candidate.post(
+                "/api/candidate/recordings",
+                json={
+                    **clip,
+                    "sequence": 1,
+                    "start_ms": 605001,
+                    "end_ms": 606001,
+                },
+            ).status_code
+            == 422
+        )
+        with SessionLocal.begin() as db:
+            session = db.get(InterviewSession, sid)
+            session.completed_at = now() - timedelta(hours=25)
+            session.started_at = session.completed_at - timedelta(minutes=10)
+        assert candidate.post("/api/candidate/recordings", json={**clip, "sequence": 1}).status_code == 409
+
+
 def test_graph_recovers_from_failed_node_with_fresh_checkpointer():
     class State(TypedDict, total=False):
         first: int
