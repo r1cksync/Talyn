@@ -31,8 +31,12 @@ def register(data: Credentials, request: Request, db: Session = Depends(get_db))
     if settings().mode == "demo":
         return {"message": "Synthetic demo uses the demo sign-in button. No account or email was created."}
     try:
-        cognito().sign_up(ClientId=settings().cognito_client_id, Username=str(data.email).lower(),
-            Password=data.password, UserAttributes=[{"Name": "email", "Value": str(data.email).lower()}])
+        cognito().sign_up(
+            ClientId=settings().cognito_client_id,
+            Username=str(data.email).lower(),
+            Password=data.password,
+            UserAttributes=[{"Name": "email", "Value": str(data.email).lower()}],
+        )
     except Exception as exc:
         raise HTTPException(400, "Registration could not be completed. Check your details or sign in.") from exc
     return {"message": "Check your email for the verification code."}
@@ -45,8 +49,9 @@ def verify(data: VerifyRegistration, request: Request, db: Session = Depends(get
     if settings().mode != "aws":
         raise HTTPException(400, "Use demo sign in")
     try:
-        cognito().confirm_sign_up(ClientId=settings().cognito_client_id, Username=str(data.email).lower(),
-                                 ConfirmationCode=data.code)
+        cognito().confirm_sign_up(
+            ClientId=settings().cognito_client_id, Username=str(data.email).lower(), ConfirmationCode=data.code
+        )
     except Exception as exc:
         raise HTTPException(400, "Verification code invalid or expired") from exc
     return {"verified": True}
@@ -54,8 +59,9 @@ def verify(data: VerifyRegistration, request: Request, db: Session = Depends(get
 
 def login_response(db, response, subject, email):
     membership = db.scalar(select(Membership).where(Membership.subject == subject))
-    session, token = create_session(db, kind="manager", subject=subject, email=email,
-                                   org_id=membership.org_id if membership else None)
+    session, token = create_session(
+        db, kind="manager", subject=subject, email=email, org_id=membership.org_id if membership else None
+    )
     set_cookie(response, "manager", token)
     return {"csrf": session.csrf, "org_id": session.org_id, "email": email, "mode": settings().mode}
 
@@ -67,8 +73,11 @@ def login(data: Credentials, request: Request, response: Response, db: Session =
     if settings().mode != "aws":
         raise HTTPException(400, "Use demo sign in")
     try:
-        result = cognito().initiate_auth(ClientId=settings().cognito_client_id, AuthFlow="USER_PASSWORD_AUTH",
-            AuthParameters={"USERNAME": str(data.email).lower(), "PASSWORD": data.password})
+        result = cognito().initiate_auth(
+            ClientId=settings().cognito_client_id,
+            AuthFlow="USER_PASSWORD_AUTH",
+            AuthParameters={"USERNAME": str(data.email).lower(), "PASSWORD": data.password},
+        )
         token = result["AuthenticationResult"]["IdToken"]
         issuer = f"https://cognito-idp.{settings().region}.amazonaws.com/{settings().cognito_pool_id}"
         key = jwt.PyJWKClient(issuer + "/.well-known/jwks.json").get_signing_key_from_jwt(token)
@@ -92,8 +101,13 @@ def demo(request: Request, response: Response, db: Session = Depends(get_db)):
 @router.get("/me")
 def me(auth=Depends(manager), db: Session = Depends(get_db)):
     memberships = db.scalars(select(Membership).where(Membership.subject == auth.subject)).all()
-    return {"csrf": auth.csrf, "email": auth.email, "org_id": auth.org_id, "mode": settings().mode,
-            "memberships": [{"org_id": m.org_id, "role": m.role} for m in memberships]}
+    return {
+        "csrf": auth.csrf,
+        "email": auth.email,
+        "org_id": auth.org_id,
+        "mode": settings().mode,
+        "memberships": [{"org_id": m.org_id, "role": m.role} for m in memberships],
+    }
 
 
 @router.post("/logout")

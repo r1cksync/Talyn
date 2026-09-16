@@ -63,10 +63,16 @@ class Settings(BaseSettings):
         if not self.database_secret_arn:
             return self.database_url
         import boto3
-        secret = json.loads(boto3.client("secretsmanager", region_name=self.region).get_secret_value(
-            SecretId=self.database_secret_arn)["SecretString"])
-        return (f"postgresql+psycopg://{quote(secret['username'])}:{quote(secret['password'], safe='')}"
-                f"@{self.database_host}:5432/talyn?sslmode=require")
+
+        secret = json.loads(
+            boto3.client("secretsmanager", region_name=self.region).get_secret_value(SecretId=self.database_secret_arn)[
+                "SecretString"
+            ]
+        )
+        return (
+            f"postgresql+psycopg://{quote(secret['username'])}:{quote(secret['password'], safe='')}"
+            f"@{self.database_host}:5432/talyn?sslmode=require"
+        )
 
 
 @lru_cache

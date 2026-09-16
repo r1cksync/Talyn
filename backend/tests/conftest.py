@@ -3,7 +3,12 @@ import tempfile
 from pathlib import Path
 
 _root = Path(tempfile.mkdtemp(prefix="talyn-tests-"))
-os.environ["TALYN_DATABASE_URL"] = "sqlite:///" + str(_root / "test.db").replace("\\", "/")
+test_url = os.environ.get("TALYN_TEST_DATABASE_URL")
+if test_url and not test_url.split("?")[0].endswith("/talyn_test"):
+    raise RuntimeError("Integration tests may only reset the dedicated talyn_test database")
+os.environ["TALYN_DATABASE_URL"] = test_url or "sqlite:///" + str(_root / "test.db").replace("\\", "/")
+if test_url:
+    os.environ["TALYN_CHECKPOINT_URL"] = test_url.replace("postgresql+psycopg://", "postgresql://")
 os.environ["TALYN_DATA_DIR"] = str(_root)
 os.environ["TALYN_MODE"] = "demo"
 os.environ["TALYN_RUN_DEMO_WORKER"] = "false"

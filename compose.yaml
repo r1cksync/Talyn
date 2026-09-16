@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16.10-alpine
+    environment:
+      POSTGRES_DB: talyn
+      POSTGRES_USER: talyn
+      POSTGRES_PASSWORD: local-demo-only
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talyn"]
+      interval: 5s
+      retries: 20
+  api:
+    build: ./backend
+    environment:
+      TALYN_MODE: demo
+      TALYN_DATABASE_URL: postgresql+psycopg://talyn:local-demo-only@postgres:5432/talyn
+      TALYN_CHECKPOINT_URL: postgresql://talyn:local-demo-only@postgres:5432/talyn
+      TALYN_PUBLIC_URL: http://localhost:3000
+      TALYN_RUN_DEMO_WORKER: "true"
+      TALYN_DATA_DIR: /tmp/talyn
+    volumes: ["demo-media:/tmp/talyn"]
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+  web:
+    build: ./frontend
+    environment:
+      API_INTERNAL_URL: http://api:8000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+volumes:
+  postgres-data:
+  demo-media:

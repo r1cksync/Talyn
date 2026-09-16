@@ -1,4 +1,5 @@
 """AWS integrations and deliberately explicit deterministic demo adapters."""
+
 import base64
 import hashlib
 import json
@@ -27,16 +28,33 @@ class Storage:
 
     def upload_url(self, key, content_type, size, checksum):
         if settings().mode == "demo":
-            token = jwt.encode({"key": key, "type": content_type, "size": size, "sha": checksum,
-                                "op": "put", "exp": int(now().timestamp()) + 300},
-                               settings().session_secret, algorithm="HS256")
+            token = jwt.encode(
+                {
+                    "key": key,
+                    "type": content_type,
+                    "size": size,
+                    "sha": checksum,
+                    "op": "put",
+                    "exp": int(now().timestamp()) + 300,
+                },
+                settings().session_secret,
+                algorithm="HS256",
+            )
             return {"url": "/api/demo/objects/" + token, "method": "PUT", "headers": {"Content-Type": content_type}}
         checksum_b64 = base64.b64encode(bytes.fromhex(checksum)).decode()
-        params = {"Bucket": settings().bucket, "Key": key, "ContentType": content_type,
-                  "ContentLength": size, "ChecksumSHA256": checksum_b64}
+        params = {
+            "Bucket": settings().bucket,
+            "Key": key,
+            "ContentType": content_type,
+            "ContentLength": size,
+            "ChecksumSHA256": checksum_b64,
+        }
         url = aws("s3").generate_presigned_url("put_object", Params=params, ExpiresIn=300)
-        return {"url": url, "method": "PUT", "headers": {"Content-Type": content_type,
-                "x-amz-checksum-sha256": checksum_b64}}
+        return {
+            "url": url,
+            "method": "PUT",
+            "headers": {"Content-Type": content_type, "x-amz-checksum-sha256": checksum_b64},
+        }
 
     def read(self, key, max_bytes=20971520):
         if settings().mode == "demo":
@@ -65,11 +83,17 @@ class Storage:
 
     def download_url(self, key, content_type="application/octet-stream"):
         if settings().mode == "demo":
-            token = jwt.encode({"key": key, "type": content_type, "op": "get", "exp": int(now().timestamp()) + 120},
-                               settings().session_secret, algorithm="HS256")
+            token = jwt.encode(
+                {"key": key, "type": content_type, "op": "get", "exp": int(now().timestamp()) + 120},
+                settings().session_secret,
+                algorithm="HS256",
+            )
             return "/api/demo/objects/" + token
-        return aws("s3").generate_presigned_url("get_object", Params={"Bucket": settings().bucket,
-            "Key": key, "ResponseContentType": content_type}, ExpiresIn=120)
+        return aws("s3").generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings().bucket, "Key": key, "ResponseContentType": content_type},
+            ExpiresIn=120,
+        )
 
     def put(self, key, data, content_type):
         if settings().mode == "demo":
@@ -92,8 +116,10 @@ class Storage:
             return
         client = aws("s3")
         for page in client.get_paginator("list_object_versions").paginate(Bucket=settings().bucket, Prefix=prefix):
-            objects = [{"Key": o["Key"], "VersionId": o["VersionId"]}
-                       for o in page.get("Versions", []) + page.get("DeleteMarkers", [])]
+            objects = [
+                {"Key": o["Key"], "VersionId": o["VersionId"]}
+                for o in page.get("Versions", []) + page.get("DeleteMarkers", [])
+            ]
             if objects:
                 result = client.delete_objects(Bucket=settings().bucket, Delete={"Objects": objects, "Quiet": True})
                 if result.get("Errors"):
@@ -118,9 +144,20 @@ class Models:
             return schema.model_validate(fixture), {"inputTokens": 0, "outputTokens": 0}
         response = aws("bedrock-runtime").converse(
             modelId=settings().bedrock_model_id,
-            system=[{"text": SYSTEM_POLICY + "\nTask: " + instruction + "\nSchema: " + json.dumps(schema.model_json_schema())}],
-            messages=[{"role": "user", "content": [{"text": json.dumps({"untrusted_data": payload}, ensure_ascii=False)}]}],
-            inferenceConfig={"maxTokens": 3500, "temperature": 0.1})
+            system=[
+                {
+                    "text": SYSTEM_POLICY
+                    + "\nTask: "
+                    + instruction
+                    + "\nSchema: "
+                    + json.dumps(schema.model_json_schema())
+                }
+            ],
+            messages=[
+                {"role": "user", "content": [{"text": json.dumps({"untrusted_data": payload}, ensure_ascii=False)}]}
+            ],
+            inferenceConfig={"maxTokens": 3500, "temperature": 0.1},
+        )
         text = "".join(part.get("text", "") for part in response["output"]["message"]["content"]).strip()
         # Never repair arbitrary prose into a successful result. Retry is bounded by graph policy and usage budget.
         return schema.model_validate_json(text), response.get("usage", {})
@@ -146,9 +183,16 @@ def deliver_email(recipient, subject, body):
         raise ValueError("Recipient is not in the development allowlist")
     if not conf.sender_email:
         raise ValueError("Verified SES sender required")
-    args = {"FromEmailAddress": conf.sender_email, "Destination": {"ToAddresses": [recipient]},
-            "Content": {"Simple": {"Subject": {"Data": subject, "Charset": "UTF-8"},
-                                    "Body": {"Text": {"Data": body, "Charset": "UTF-8"}}}}}
+    args = {
+        "FromEmailAddress": conf.sender_email,
+        "Destination": {"ToAddresses": [recipient]},
+        "Content": {
+            "Simple": {
+                "Subject": {"Data": subject, "Charset": "UTF-8"},
+                "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
+            }
+        },
+    }
     if conf.ses_configuration_set:
         args["ConfigurationSetName"] = conf.ses_configuration_set
     return aws("sesv2").send_email(**args)["MessageId"]

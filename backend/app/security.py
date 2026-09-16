@@ -57,24 +57,41 @@ def rate_limit(db: Session, key: str, limit=15, seconds=60):
 
 def create_session(db, *, kind, subject, email="", org_id=None, application_id=None):
     token = secrets.token_urlsafe(48)
-    session = AuthSession(token_hash=digest(token), kind=kind, subject=subject, email=email,
-                          org_id=org_id, application_id=application_id, csrf=secrets.token_urlsafe(24),
-                          expires_at=now() + timedelta(hours=8 if kind == "manager" else 2))
+    session = AuthSession(
+        token_hash=digest(token),
+        kind=kind,
+        subject=subject,
+        email=email,
+        org_id=org_id,
+        application_id=application_id,
+        csrf=secrets.token_urlsafe(24),
+        expires_at=now() + timedelta(hours=8 if kind == "manager" else 2),
+    )
     db.add(session)
     db.flush()
     return session, token
 
 
 def set_cookie(response, kind, token):
-    response.set_cookie("talyn_" + kind, token, httponly=True, secure=settings().mode == "aws",
-                        samesite="lax", max_age=28800 if kind == "manager" else 7200, path="/api")
+    response.set_cookie(
+        "talyn_" + kind,
+        token,
+        httponly=True,
+        secure=settings().mode == "aws",
+        samesite="lax",
+        max_age=28800 if kind == "manager" else 7200,
+        path="/api",
+    )
 
 
 def session_from_token(db, token, kind):
     if not token:
         raise HTTPException(401, "Sign in to continue")
-    auth = db.scalar(select(AuthSession).where(AuthSession.token_hash == digest(token),
-                                             AuthSession.kind == kind, AuthSession.revoked.is_(False)))
+    auth = db.scalar(
+        select(AuthSession).where(
+            AuthSession.token_hash == digest(token), AuthSession.kind == kind, AuthSession.revoked.is_(False)
+        )
+    )
     if not auth or aware(auth.expires_at) <= now():
         raise HTTPException(401, "Session expired. Verify access again.")
     return auth
@@ -96,6 +113,7 @@ def manager(request: Request, db: Session = Depends(get_db)):
 
 def candidate(request: Request, db: Session = Depends(get_db)):
     from .models import Application
+
     auth = session_from_token(db, request.cookies.get("talyn_candidate"), "candidate")
     app = db.get(Application, auth.application_id)
     if not app or app.org_id != auth.org_id or app.revoked:

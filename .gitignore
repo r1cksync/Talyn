@@ -26,3 +26,4 @@ test-results/
 task.txt
 *.tsbuildinfo
 frontend/test-fixtures/
+infra/cdk.context.json

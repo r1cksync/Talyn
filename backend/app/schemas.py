@@ -9,7 +9,7 @@ class StrictModel(BaseModel):
 
 class Credentials(StrictModel):
     email: EmailStr
-    password: str = Field(min_length=10, max_length=256)
+    password: str = Field(min_length=12, max_length=256)
 
 
 class VerifyRegistration(StrictModel):
@@ -30,8 +30,15 @@ class CriterionInput(StrictModel):
     name: str = Field(min_length=2, max_length=100)
     description: str = Field(min_length=3, max_length=2000)
     weight: float = Field(default=1, gt=0, le=10)
-    anchors: dict[str, str] = Field(default_factory=lambda: {"1": "Limited relevant evidence", "2": "Partial evidence",
-        "3": "Meets the criterion with a concrete example", "4": "Strong reasoning and tradeoffs", "5": "Exceptional depth and evidence"})
+    anchors: dict[str, str] = Field(
+        default_factory=lambda: {
+            "1": "Limited relevant evidence",
+            "2": "Partial evidence",
+            "3": "Meets the criterion with a concrete example",
+            "4": "Strong reasoning and tradeoffs",
+            "5": "Exceptional depth and evidence",
+        }
+    )
 
 
 class JobInput(StrictModel):

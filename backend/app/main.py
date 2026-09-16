@@ -6,6 +6,8 @@ import jwt
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy import text
 
 from . import auth, candidate_api, manager_api, realtime
@@ -18,14 +20,17 @@ from .db import SessionLocal
 @asynccontextmanager
 async def lifespan(app):
     setup()
+
     async def work():
         from .worker import run_once
+
         while True:
             try:
                 await asyncio.to_thread(run_once)
             except Exception:
                 pass
             await asyncio.sleep(1)
+
     task = asyncio.create_task(work()) if settings().mode == "demo" and settings().run_demo_worker else None
     yield
     if task:
@@ -33,17 +38,34 @@ async def lifespan(app):
         await asyncio.gather(task, return_exceptions=True)
 
 
-app = FastAPI(title="Talyn API", version="0.1.0", lifespan=lifespan,
-              docs_url="/api/docs" if settings().mode == "demo" else None, openapi_url="/api/openapi.json" if settings().mode == "demo" else None)
-app.add_middleware(CORSMiddleware, allow_origins=[settings().public_url], allow_credentials=True,
-                   allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"], allow_headers=["Content-Type", "X-CSRF-Token"])
+app = FastAPI(
+    title="Talyn API",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url="/api/docs" if settings().mode == "demo" else None,
+    openapi_url="/api/openapi.json" if settings().mode == "demo" else None,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings().public_url],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "X-CSRF-Token"],
+)
+
+
+@app.exception_handler(RequestValidationError)
+async def invalid_input(request, exc):
+    # Pydantic errors can echo input values. Never echo passwords or invitation secrets.
+    fields = sorted({str(error["loc"][-1]) for error in exc.errors()})
+    return JSONResponse(status_code=422, content={"detail": "Check the following fields: " + ", ".join(fields)})
 
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     length = request.headers.get("content-length")
     try:
-        if length and int(length) > 21*1024*1024:
+        if length and int(length) > 21 * 1024 * 1024:
             return Response(status_code=413)
     except ValueError:
         return Response(status_code=400)

@@ -1,7 +1,7 @@
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --maxsockets=3 --fetch-retries=4
 COPY . .
 ARG API_INTERNAL_URL=http://api:8000
 ENV API_INTERNAL_URL=$API_INTERNAL_URL NEXT_TELEMETRY_DISABLED=1

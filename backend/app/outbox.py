@@ -1,8 +1,9 @@
 import json
+from datetime import timedelta
 
 from sqlalchemy import select
 
-from .models import AsyncJob, AuditLog, EmailDelivery, Usage
+from .models import AsyncJob, AuditLog, EmailDelivery, Usage, now
 from .security import encrypt
 
 
@@ -20,8 +21,14 @@ def queue_email(db, org_id, recipient, kind, key, subject, body):
     existing = db.scalar(select(EmailDelivery).where(EmailDelivery.dedupe_key == key))
     if existing:
         return existing
-    delivery = EmailDelivery(org_id=org_id, recipient=recipient, kind=kind, dedupe_key=key,
-        payload_ciphertext=encrypt(json.dumps({"subject": subject, "body": body})))
+    delivery = EmailDelivery(
+        org_id=org_id,
+        recipient=recipient,
+        kind=kind,
+        dedupe_key=key,
+        payload_ciphertext=encrypt(json.dumps({"subject": subject, "body": body})),
+        delete_after=now() + timedelta(days=30),
+    )
     db.add(delivery)
     db.flush()
     enqueue(db, org_id, "email", delivery.id, "email:" + key)
@@ -34,4 +41,13 @@ def meter(db, org_id, application_id, name, amount, key):
 
 
 def audit(db, org_id, actor, action, target_id, details=None):
-    db.add(AuditLog(org_id=org_id, actor=actor, action=action, target_id=target_id, details=details or {}))
+    db.add(
+        AuditLog(
+            org_id=org_id,
+            actor=actor,
+            action=action,
+            target_id=target_id,
+            details=details or {},
+            delete_after=now() + timedelta(days=90),
+        )
+    )

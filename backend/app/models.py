@@ -1,7 +1,19 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
@@ -33,6 +45,9 @@ class Organization(Entity, Base):
     max_concurrent: Mapped[int] = mapped_column(default=10)
     used_minutes: Mapped[int] = mapped_column(default=0)
     active_sessions: Mapped[int] = mapped_column(default=0)
+    usage_period: Mapped[str] = mapped_column(
+        String(7), default=lambda: now().strftime("%Y-%m"), server_default="1970-01"
+    )
 
 
 class Membership(Tenant, Base):
@@ -40,7 +55,10 @@ class Membership(Tenant, Base):
     subject: Mapped[str] = mapped_column(String(200), index=True)
     email: Mapped[str] = mapped_column(String(320))
     role: Mapped[str] = mapped_column(String(20), default="owner")
-    __table_args__ = (UniqueConstraint("org_id", "subject"), CheckConstraint("role IN ('owner','recruiter','reviewer')"))
+    __table_args__ = (
+        UniqueConstraint("org_id", "subject"),
+        CheckConstraint("role IN ('owner','recruiter','reviewer')"),
+    )
 
 
 class AuthSession(Entity, Base):
@@ -299,7 +317,10 @@ class Report(Tenant, Base):
     content: Mapped[dict] = mapped_column(JSON)
     manager_notes: Mapped[str] = mapped_column(Text, default="")
     decision: Mapped[str] = mapped_column(default="pending")
-    __table_args__ = (UniqueConstraint("session_id", "audience", "version"), CheckConstraint("audience IN ('manager','candidate')"))
+    __table_args__ = (
+        UniqueConstraint("session_id", "audience", "version"),
+        CheckConstraint("audience IN ('manager','candidate')"),
+    )
 
 
 class EmailDelivery(Tenant, Base):
