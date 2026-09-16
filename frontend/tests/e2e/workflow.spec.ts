@@ -113,7 +113,7 @@ test("manager → synthetic document → invitation → consent → media → re
             .isVisible()) ||
           (await candidate
             .getByRole("button", { name: "Finish answer" })
-            .isEnabled()
+            .isEnabled({timeout: 250})
             .catch(() => false)),
       )
       .toBe(true);
