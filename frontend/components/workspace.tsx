@@ -232,7 +232,7 @@ export default function Workspace() {
         </nav>
         <div className="sidebar-bottom">
           <div className="trust-card">
-            <ShieldCheck size={19} color="#7d6eb4" />
+            <ShieldCheck size={19} color="var(--purple)" />
             <h4>Evidence. Not assumptions.</h4>
             <p>
               Thoughtful interviews. Transparent feedback. Decisions made by
@@ -1028,7 +1028,7 @@ function Auth({ onLogin }: { onLogin: (user: any) => void }) {
       <section className="auth-story">
         <Brand light />
         <div className="auth-copy">
-          <div className="eyebrow" style={{ color: "#baaae3" }}>
+          <div className="eyebrow">
             A BETTER WAY TO GET TO KNOW SOMEONE
           </div>
           <h1>

@@ -1,4 +1,4 @@
-import Workspace from "@/components/workspace";
+import Landing from "@/components/landing";
 export default function Page() {
-  return <Workspace />;
+  return <Landing />;
 }

@@ -1018,7 +1018,7 @@ export default function Interview() {
                   </p>
                 </div>
                 <div className="panel panel-pad">
-                  <ShieldCheck size={20} color="#7d6eb4" />
+                  <ShieldCheck size={20} color="var(--purple)" />
                   <h3 style={{ marginTop: 10 }}>Take a moment.</h3>
                   <p className="small" style={{ marginTop: 8 }}>
                     It’s okay to think before you answer. Concrete examples help

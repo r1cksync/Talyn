@@ -424,7 +424,7 @@ def evaluate_application(org_id, application_id):
                 "manager_report",
                 f"manager-report:{app.id}:1:{member.id}",
                 "Interview report ready for review",
-                f"An interview report is ready. Sign in to review the evidence and make your own decision: {settings().public_url}/?report={app.id}",
+                f"An interview report is ready. Sign in to review the evidence and make your own decision: {settings().public_url}/workspace?report={app.id}",
             )
         app.status = "reported"
         audit(db, org_id, "worker", "reports.generated", app.id, {"version": 1, "transitions": state["transitions"]})

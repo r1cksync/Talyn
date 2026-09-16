@@ -5,7 +5,7 @@ test("manager → synthetic document → invitation → consent → media → re
   page,
   context,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await page.getByRole("button", { name: "Enter synthetic demo" }).click();
   await page.getByLabel("Organization name").fill("Northstar Studio");
   await page.getByRole("button", { name: "Create workspace" }).click();
