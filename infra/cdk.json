@@ -6,6 +6,7 @@
     "project": "talyn",
     "region": "ap-south-1",
     "monthlyBudget": 150,
+    "ingress": "ip",
     "githubRepository": "r1cksync/Talyn",
     "githubSubjectPrefix": "repo:r1cksync@152320439/Talyn@1372794747"
   }

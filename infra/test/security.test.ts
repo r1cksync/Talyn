@@ -3,6 +3,37 @@ import { App } from "aws-cdk-lib";
 import { Template, Match } from "aws-cdk-lib/assertions";
 import { Foundation, Runtime } from "../lib/stacks";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+
+test("IP HTTPS gateway keeps the origin private and renews its certificate", () => {
+  const app = new App({ context: { ingress: "ip" } });
+  const foundation = new Foundation(app, "IpFoundation", {
+    env: { account: "111111111111", region: "ap-south-1" },
+  });
+  new Runtime(foundation, "Runtime", {
+    foundation,
+    senderEmail: "sender@example.com",
+    imageTag: "fixture",
+  });
+  const template = Template.fromStack(foundation);
+  template.resourceCountIs("AWS::CloudFront::Distribution", 0);
+  template.resourceCountIs("AWS::EC2::EIP", 1);
+  template.hasResourceProperties("AWS::ElasticLoadBalancingV2::LoadBalancer", {
+    Scheme: "internal",
+  });
+  template.hasResourceProperties("AWS::EC2::Instance", {
+    InstanceType: "t2.micro",
+    BlockDeviceMappings: Match.arrayWith([
+      Match.objectLike({ Ebs: { Encrypted: true } }),
+    ]),
+  });
+  template.hasResourceProperties("AWS::EC2::LaunchTemplate", {
+    LaunchTemplateData: { MetadataOptions: { HttpTokens: "required" } },
+  });
+  template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+    MetricName: "CertificateSecondsRemaining",
+    TreatMissingData: "breaching",
+  });
+});
 test("AWS-generated HTTPS address routes through a private uncached VPC origin", () => {
   const app = new App({
     context: { cloudFrontPrefixListId: "pl-00000000000000000" },

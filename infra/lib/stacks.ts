@@ -29,6 +29,7 @@ import * as ses from "aws-cdk-lib/aws-ses";
 import * as scheduler from "aws-cdk-lib/aws-scheduler";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import { ipGateway } from "./ip-gateway";
 
 export class Foundation extends Stack {
   readonly vpc: ec2.Vpc;
@@ -461,6 +462,25 @@ export class Runtime extends Construct {
         sslPolicy: elb.SslPolicy.TLS13_RES,
         defaultTargetGroups: [webTarget],
       });
+    } else if (this.node.tryGetContext("ingress") === "ip") {
+      const gateway = ipGateway(
+        this,
+        f.vpc,
+        alb.loadBalancerDnsName,
+        props.senderEmail,
+        f.alerts,
+      );
+      alb.connections.allowFrom(
+        gateway.security,
+        ec2.Port.tcp(80),
+        "Private HTTPS gateway origin",
+      );
+      listener = alb.addListener("PrivateHttp", {
+        port: 80,
+        open: false,
+        defaultTargetGroups: [webTarget],
+      });
+      url = gateway.url;
     } else {
       const prefixId =
         this.node.tryGetContext("cloudFrontPrefixListId") ||

@@ -65,7 +65,8 @@ jobs:
           npm run build
           npm test
           npx cdk synth --quiet -c domain=talyn.example.com -c certificateArn=arn:aws:acm:ap-south-1:111111111111:certificate/00000000-0000-0000-0000-000000000000 -c senderEmail=sender@example.com
-          npx cdk synth --quiet -c runtime=true -c senderEmail=sender@example.com -c cloudFrontPrefixListId=pl-00000000000000000
+          npx cdk synth --quiet -c runtime=true -c ingress=cloudfront -c senderEmail=sender@example.com -c cloudFrontPrefixListId=pl-00000000000000000
+          npx cdk synth --quiet -c runtime=true -c ingress=ip -c senderEmail=sender@example.com
       - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v4

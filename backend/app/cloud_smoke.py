@@ -66,7 +66,7 @@ def main():
         manager.headers["x-csrf-token"] = login["csrf"]
         org = call(manager, "POST", "/organizations", {"name": "Synthetic AWS acceptance " + str(int(time.time()))})
         oid = org["id"]
-        passed("cloudfront_https_cognito_login_organization")
+        passed("https_cognito_login_organization")
         job = call(
             manager,
             "POST",
@@ -279,7 +279,7 @@ def main():
             asyncio.run(answer())
             state = call(candidate, "POST", "/candidate/turn", {"turn": state["turn"]})
         call(candidate, "POST", "/candidate/finish")
-        passed("cloudfront_websocket_pcm_transcribe_polly_interview")
+        passed("public_websocket_pcm_transcribe_polly_interview")
 
         def frame_processed():
             with SessionLocal() as db:

@@ -2,6 +2,8 @@
 
 Legend: implemented = code exists; tested = named checks passed; deployed = running AWS resource verified. These are separate claims.
 
+Runtime update: CloudFront distribution creation failed with an account-verification requirement. The stack rolled back that runtime attempt. The new no-domain fallback uses a static AWS IP, a small nginx HTTPS gateway and automatically renewed Let's Encrypt IP certificate. Three infrastructure suites and IP-path synthesis passed. Live deployment/acceptance remains pending. The transaction-ordering fix now passes 18 backend tests on both databases and the complete Docker browser journey; GitHub CI passed on `a93f92d`.
+
 | Milestone | Implemented | Tested | Deployed / blocked |
 |---|---|---|---|
 | Foundation, tenancy, auth, database | Implemented | SQLite + PostgreSQL authorization/migration tests | Cognito cloud acceptance pending |

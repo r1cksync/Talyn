@@ -33,6 +33,8 @@ The chosen development alert budget is **$150/month**, before meaningful intervi
 
 ## Approximate 30-minute interview
 
+Account-specific ingress fallback: CloudFront distribution creation is denied until AWS verifies the account. A one-vCPU EC2 t2.micro nginx gateway, 8 GiB encrypted gp3 and one Elastic IP replace CloudFront. Allow approximately $15/month for this gateway and IPv4/storage, keeping the complete development baseline at roughly **$120–150/month**. Certificate issuance is free; renewals run automatically every four hours. This single gateway is a development availability limitation. The existing $150 alert remains an alert rather than a cap. See [IP certificates](https://letsencrypt.org/2026/03/11/shorter-certs-certbot/) and [EC2 on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/).
+
 Conservative example: 30 transcribed minutes; 3,000 Polly neural characters; 60 sampled frames (one per 30 seconds); 40,000 input/8,000 output model tokens; 120 MB of video retained one month; five emails.
 
 | Meter | Assumption | Approximate USD |

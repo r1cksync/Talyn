@@ -65,4 +65,4 @@ jobs:
       - name: Verify deployed service
         run: |
           url=$(jq -r '.TalynFoundation.ApplicationUrl' infra/deployment-outputs.json)
-          curl --fail --retry 6 --retry-delay 10 "$url/api/health"
+          curl --fail --retry 30 --retry-delay 10 --retry-all-errors --max-time 20 "$url/api/health"

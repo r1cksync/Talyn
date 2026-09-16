@@ -6,7 +6,7 @@ HTTP database dependencies use FastAPI `scope="function"` so their transaction c
 
 ## Authorized changes during implementation
 
-The user has no domain and authorized an AWS-generated test address. CloudFront terminates public HTTPS and connects privately through a VPC origin to an internal ALB. Caching is disabled; cookies and WebSocket headers are forwarded. No domain purchase is needed. The original public HTTPS ALB path remains available with a custom domain/certificate.
+The user has no domain and explicitly accepted an IP for testing. AWS rejected CloudFront distribution creation pending account verification. The selected fallback is an AWS EC2 t2.micro HTTPS gateway with a static Elastic IP and a trusted six-day Let's Encrypt IP certificate, checked/renewed every four hours. Nginx forwards HTTP and WebSockets to an internal ALB; inbound origin access is limited to the gateway security group. Certificates remain on the encrypted gateway disk. A CloudWatch expiry/missing-metric alarm reports renewal trouble. The gateway is a single development instance, with SSM administration and no SSH ingress. No domain purchase is needed. Optional CloudFront and existing-domain HTTPS ALB paths remain implemented.
 
 The AWS account rejects Bedrock even with root credentials. The user explicitly selected Groq and supplied its key, overriding the original AWS-only LLM restriction. Only structured LLM requests go to Groq; runtime, documents, database, speech, media and email remain on AWS. Secrets Manager holds the key and ECS injects it only into API/worker tasks. Candidate consent version `2026-09-v2-groq` discloses this external processing. The development pilot is limited to two concurrent interviews per organization for free-tier testing.
 
