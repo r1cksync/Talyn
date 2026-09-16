@@ -24,6 +24,21 @@ Generate sample documents and automated browser media with `cd backend`, `uv syn
 
 `docker compose stop` stops local containers and preserves demo data. Bindings are localhost only. The Compose password is exclusively a disposable local development credential. Do not expose the demo publicly.
 
+## Hiring manager upload samples
+
+The [demo upload kit](demo-upload-kit/START-HERE.txt) contains three fictional resumes in PDF and DOCX, a candidate CSV, an optional project brief, and job fields matching the current website. Upload either format of each resume, not both. The bulk CSV uses placeholder addresses for importing/preparing candidates; use a verified and allowed inbox for live invitation tests. A local `03-candidate-self-test.csv`, when generated, is excluded from Git.
+
+The included documents are ready to upload. To regenerate them on Windows with Node.js and Microsoft Word installed:
+
+```powershell
+npm install --prefix .local/demo-kit-tools --save-exact --no-audit --no-fund docx@9.7.1
+$env:NODE_PATH=(Resolve-Path '.local/demo-kit-tools/node_modules').Path
+node scripts/create_demo_upload_kit.cjs --self-email your-verified-address@example.com
+./scripts/export_demo_pdfs.ps1
+```
+
+Replace the example email with your verified inbox. Generation sends no email and creates no AWS jobs. All eight PDF/DOCX files were checked with Talyn's isolated document parser; DOCX schema checks and visual review of every exported PDF page passed. Candidate CSVs and job fields were checked against the application's input schemas.
+
 ## Checks
 
 ```sh
@@ -49,4 +64,4 @@ npm test
 
 CI repeats backend tests against a separate PostgreSQL database. Tests reset only a database named `talyn_test`; never provide a production database URL. Browser tests use fixture media and simulated recipients.
 
-See [architecture](docs/architecture.md), [deployment and rollback](docs/deployment.md), [operations](docs/operations.md), [costs](docs/costs.md), and [limitations](docs/limitations.md). No Kaggle data or training is required. `task.txt`, credentials, local data, generated fixtures and build artifacts are excluded by `.gitignore`.
+See [architecture](docs/architecture.md), [deployment and rollback](docs/deployment.md), [operations](docs/operations.md), [costs](docs/costs.md), and [limitations](docs/limitations.md). No Kaggle data or training is required. `task.txt`, credentials, local data, generated browser fixtures and build artifacts are excluded by `.gitignore`.

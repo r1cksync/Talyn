@@ -1,0 +1,25 @@
+TALYN HIRING MANAGER DEMO FILES
+
+All resumes and project evidence are fictional. The three profiles contain different kinds of evidence; their resumes do not predetermine interview scores.
+
+QUICKEST FULL TEST
+1. Sign in as the demo recruiter at https://13.204.206.74/workspace and select Talyn Demo Workspace. Use your existing demo login.
+2. Create a NEW role using 01-job-setup.txt. The current form offers 15 minutes as its shortest duration.
+3. Import 03-candidate-self-test.csv using Import candidates CSV. It uses your chosen verified inbox and the fictional Nora Patel persona.
+4. On Nora Patel's row, upload resumes/nora-patel-resume.pdf OR resumes/nora-patel-resume.docx. Use only one format; both contain the same resume. Upload the resume FIRST.
+5. Optionally upload supporting/nora-patel-project-brief.pdf OR its DOCX version as the second document.
+6. Wait until extraction is ready, click Prepare, review the generated plan and approve it. When using a fictional resume yourself, edit personalized questions to treat the projects as scenarios.
+7. Select the approved candidate and launch the invitation. Open the NEW email invitation, verify your email and take the interview. The manager report appears after completion.
+
+BULK IMPORT AND DOCUMENT TEST
+On a separate new role, import 02-candidates-bulk.csv. Match each name to the corresponding resume filename. These example.com email addresses are placeholders for importing and preparing candidates; they cannot receive invitations. For delivery tests, use the separate self-test CSV with an already verified/allowed inbox.
+
+PROFILE MAP
+Nora Patel -> nora-patel-resume -> API transactions and concurrency examples
+Arjun Sen -> arjun-sen-resume -> debugging, validation and testing examples
+Maya Chen -> maya-chen-resume -> SQL/data work with limited API evidence
+
+UPLOAD RULES
+Candidate import accepts a CSV with exactly name,email columns. Candidate documents accept PDF or DOCX, up to 10 MB each, maximum four per application. Upload one resume format per person, not both copies. TXT/JSON files are job setup/reference material, not document uploads. job-template.json mirrors the API fields; the website does not import job JSON.
+
+Use a fresh role if you want to repeat the same email: one candidate email maps to one application per job. No email is sent and no AWS job is created by generating this folder.

@@ -1,0 +1,21 @@
+TALYN DEMO JOB
+
+Copy these fields into Create role. This file is a guide, not an upload.
+
+Job title: Junior Backend Engineer - Demo Hiring
+Seniority: Junior
+Interview duration: 15 minutes
+Required skills: Python, PostgreSQL, REST APIs, Automated testing
+
+Job description:
+Fictional role for testing Talyn. Build Python REST APIs backed by PostgreSQL for a campus event platform. Design seat reservation and cancellation endpoints, protect data using transactions and constraints, validate requests, and write automated tests. Diagnose intermittent failures using logs and reproducible experiments. Explain technical alternatives and work constructively through code review. Coursework and personal projects are valid examples; commercial experience is not required.
+
+Evaluation criteria:
+1. Technical reasoning
+Explain API and database decisions, data correctness and one practical trade-off using a concrete example.
+
+2. Problem solving
+Describe how to reproduce a failure, gather evidence, test a fix and verify the result.
+
+3. Collaboration
+Explain a specific discussion, response to feedback and shared decision on a technical task.

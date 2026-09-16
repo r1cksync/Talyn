@@ -1,0 +1,26 @@
+{
+  "title": "Junior Backend Engineer - Demo Hiring",
+  "description": "Fictional role for testing Talyn. Build Python REST APIs backed by PostgreSQL for a campus event platform. Design seat reservation and cancellation endpoints, protect data using transactions and constraints, validate requests, and write automated tests. Diagnose intermittent failures using logs and reproducible experiments. Explain technical alternatives and work constructively through code review. Coursework and personal projects are valid examples; commercial experience is not required.",
+  "seniority": "Junior",
+  "duration_minutes": 15,
+  "skills": [
+    "Python",
+    "PostgreSQL",
+    "REST APIs",
+    "Automated testing"
+  ],
+  "criteria": [
+    {
+      "name": "Technical reasoning",
+      "description": "Explain API and database decisions, data correctness and one practical trade-off using a concrete example."
+    },
+    {
+      "name": "Problem solving",
+      "description": "Describe how to reproduce a failure, gather evidence, test a fix and verify the result."
+    },
+    {
+      "name": "Collaboration",
+      "description": "Explain a specific discussion, response to feedback and shared decision on a technical task."
+    }
+  ]
+}

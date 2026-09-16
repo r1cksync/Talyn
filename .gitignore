@@ -27,3 +27,4 @@ task.txt
 *.tsbuildinfo
 frontend/test-fixtures/
 infra/cdk.context.json
+demo-upload-kit/03-candidate-self-test.csv
