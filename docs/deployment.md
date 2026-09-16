@@ -49,6 +49,8 @@ RDS keeps automated backups seven days. Restore a snapshot or point-in-time back
 
 ## Stop and cleanup
 
+GitHub OIDC uses this repository's immutable subject prefix from `gh api repos/r1cksync/Talyn/actions/oidc/customization/sub`, configured as `githubSubjectPrefix` in `infra/cdk.json`. The trust policy appends `:ref:refs/heads/main` and matches exactly. See [GitHub immutable subject claims](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims). For a fork, query and replace the prefix before bootstrapping its deployment role.
+
 Local: `docker compose stop` preserves database/media volumes. No automatic deletion occurs.
 
 AWS: inventory only `TalynFoundation` / `Project=talyn` resources, export needed data and review the resource plan first. RDS deletion protection intentionally blocks teardown. S3, ECR, Cognito, KMS, secrets and logs can be retained after stack deletion and require separate deliberate cleanup. Check backup expiration and retained resource charges. Never run blanket account cleanup. No unrelated resources were modified or deleted.

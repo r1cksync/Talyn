@@ -300,6 +300,8 @@ export class Foundation extends Stack {
         });
     const repo =
       this.node.tryGetContext("githubRepository") || "r1cksync/Talyn";
+    // New GitHub repositories use immutable owner/repository IDs in the subject.
+    const subjectPrefix = this.node.tryGetContext("githubSubjectPrefix") || `repo:${repo}`;
     const deployRole = new iam.Role(this, "GithubDeploymentRole", {
       roleName: "talyn-github-deploy",
       assumedBy: new iam.WebIdentityPrincipal(
@@ -307,7 +309,7 @@ export class Foundation extends Stack {
         {
           StringEquals: {
             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-            "token.actions.githubusercontent.com:sub": `repo:${repo}:ref:refs/heads/main`,
+            "token.actions.githubusercontent.com:sub": `${subjectPrefix}:ref:refs/heads/main`,
           },
         },
       ),

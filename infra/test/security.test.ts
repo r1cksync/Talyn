@@ -38,6 +38,7 @@ test("private storage, isolated TLS database, HTTPS routing, scoped OIDC, zero N
       domain: "talyn.example.com",
       monthlyBudget: 150,
       githubRepository: "r1cksync/Talyn",
+      githubSubjectPrefix: "repo:r1cksync@152320439/Talyn@1372794747",
     },
   });
   const foundation = new Foundation(app, "TestFoundation", {
@@ -78,7 +79,7 @@ test("private storage, isolated TLS database, HTTPS routing, scoped OIDC, zero N
             StringEquals: {
               "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
               "token.actions.githubusercontent.com:sub":
-                "repo:r1cksync/Talyn:ref:refs/heads/main",
+                "repo:r1cksync@152320439/Talyn@1372794747:ref:refs/heads/main",
             },
           },
         }),
