@@ -20,6 +20,21 @@ test("IP HTTPS gateway keeps the origin private and renews its certificate", () 
     imageTag: "fixture",
   });
   const template = Template.fromStack(foundation);
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: {
+      Statement: Match.arrayWith([
+        Match.objectLike({
+          Action: "ses:SendEmail",
+          Resource: Match.arrayWith([
+            "arn:aws:ses:ap-south-1:111111111111:identity/candidate@example.com",
+          ]),
+          Condition: {
+            StringEquals: { "ses:FromAddress": "sender@example.com" },
+          },
+        }),
+      ]),
+    },
+  });
   template.hasResourceProperties("AWS::ECS::TaskDefinition", {
     ContainerDefinitions: Match.arrayWith([
       Match.objectLike({

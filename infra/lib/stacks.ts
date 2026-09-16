@@ -633,27 +633,6 @@ export class Runtime extends Construct {
     f.queue.grantConsumeMessages(workerRole);
     f.queue.grantSendMessages(workerRole);
     f.eventQueue.grantConsumeMessages(workerRole);
-    workerRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["ses:SendEmail"],
-        resources: [
-          `arn:aws:ses:${this.region}:${this.account}:identity/${props.senderEmail}`,
-          `arn:aws:ses:${this.region}:${this.account}:identity/${props.senderEmail.split("@")[1]}`,
-          `arn:aws:ses:${this.region}:${this.account}:configuration-set/${configSet.configurationSetName}`,
-        ],
-        conditions: { StringEquals: { "ses:FromAddress": props.senderEmail } },
-      }),
-    );
-    workerRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: [
-          "rekognition:DetectFaces",
-          "textract:StartDocumentTextDetection",
-          "textract:GetDocumentTextDetection",
-        ],
-        resources: ["*"],
-      }),
-    );
     const additionalRecipients = String(
       this.node.tryGetContext("additionalEmailRecipients") || "",
     )
@@ -670,6 +649,31 @@ export class Runtime extends Construct {
         "additionalEmailRecipients must contain at most 20 valid email addresses",
       );
     }
+    workerRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["ses:SendEmail"],
+        resources: [
+          `arn:aws:ses:${this.region}:${this.account}:identity/${props.senderEmail}`,
+          `arn:aws:ses:${this.region}:${this.account}:identity/${props.senderEmail.split("@")[1]}`,
+          ...additionalRecipients.map(
+            (email) =>
+              `arn:aws:ses:${this.region}:${this.account}:identity/${email}`,
+          ),
+          `arn:aws:ses:${this.region}:${this.account}:configuration-set/${configSet.configurationSetName}`,
+        ],
+        conditions: { StringEquals: { "ses:FromAddress": props.senderEmail } },
+      }),
+    );
+    workerRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "rekognition:DetectFaces",
+          "textract:StartDocumentTextDetection",
+          "textract:GetDocumentTextDetection",
+        ],
+        resources: ["*"],
+      }),
+    );
     const emailAllowlist = Array.from(
       new Set([
         props.senderEmail.toLowerCase(),
