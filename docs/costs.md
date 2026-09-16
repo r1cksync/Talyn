@@ -1,6 +1,6 @@
 # Development resource plan and cost assumptions
 
-Plan prepared before provisioning, 16 September 2026. Region `ap-south-1` (Mumbai). Project tag `Project=talyn`. No AWS infrastructure has been provisioned in this session. Small synthetic Polly/Transcribe requests were made; AWS determines their metered charge.
+Plan prepared before provisioning and updated 16 September 2026. Region `ap-south-1` (Mumbai). Project tag `Project=talyn`. Foundation infrastructure is now provisioned and incurs charges. Runtime/acceptance status is in [STATUS](STATUS.md). Synthetic Polly/Transcribe requests were made; AWS determines their metered charge.
 
 ## Concrete resource plan
 

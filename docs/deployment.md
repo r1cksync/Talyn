@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Target: `talyn`, Mumbai (`ap-south-1`). Only an SES sender identity has been created for verification; compute/storage infrastructure is not deployed. Read [blockers](aws-blockers.md) and [costs](costs.md) first. Expected baseline: roughly US$110–135/month; US$150 is an alert, not a spending cap.
+Target: `talyn`, Mumbai (`ap-south-1`). Foundation resources are provisioned, including the private database, storage, queues and Cognito. The SES sender is verified. Runtime deployment and acceptance are tracked in [STATUS](STATUS.md). Expected baseline: roughly US$110–135/month; US$150 is an alert, not a spending cap.
 
 ## Prerequisites
 
@@ -39,7 +39,9 @@ The free Groq pilot allows two concurrent interviews per organization. Ten concu
 
 ## Live acceptance
 
-Verify HTTPS health, Cognito signup/verification, two-tenant isolation, signed S3 checksums, a scanned synthetic PDF through Textract, Bedrock plan/evidence validation, one browser PCM → Transcribe → Polly interview, SQS retries, S3 clips, Rekognition frames and SES simulator delivery/bounce/complaint events. Confirm alarms and budget subscriptions. Repeat ten concurrent live sessions with bounded fixtures and report actual latency/cost before claiming cloud capacity. These deployed checks have not run.
+Run `uv run python ../scripts/run_cloud_acceptance.py --credential-csv PATH_TO_LOCAL_CSV` from backend after runtime deployment. This launches one bounded Fargate task using a simulator-only Cognito user and separately injected secret. It verifies HTTPS login, signed S3 documents, SQS extraction, Groq preparation and reports, SES simulator invitation/OTP, CloudFront WebSocket PCM streaming through Transcribe, Polly playback, recorded clips and report audience separation. It expires the synthetic application after one day and never prints credentials or invitation tokens. This task requires operator IAM/Cognito/ECS/Secrets Manager permissions; these administrative permissions are not granted to the application.
+
+The generated-media protocol check does not substitute for real-browser device testing. Also verify signup/email verification, scanned-PDF Textract, delivered Rekognition observations, bounce/complaint events, alarms and restore procedures before production. Ten simultaneous live sessions remain outside the free two-interview Groq pilot. See STATUS for checks actually completed.
 
 ## Rollback and recovery
 
