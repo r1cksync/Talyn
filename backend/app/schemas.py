@@ -108,7 +108,7 @@ class ChallengeInput(StrictModel):
 
 
 class ConsentInput(StrictModel):
-    policy_version: Literal["2026-09-v1"]
+    policy_version: Literal["2026-09-v1", "2026-09-v2-groq"]
     recording: bool
     transcription: bool
     ai_evaluation: bool

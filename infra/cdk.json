@@ -1,0 +1,1 @@
+{"app":"npx tsx bin/app.ts","context":{"@aws-cdk/aws-ec2:restrictDefaultSecurityGroup":true,"@aws-cdk/aws-rds:databaseProxyUniqueResourceName":true,"project":"talyn","region":"ap-south-1","monthlyBudget":150,"githubRepository":"r1cksync/Talyn"}}

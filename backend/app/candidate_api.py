@@ -175,7 +175,8 @@ def candidate_info(auth=Depends(candidate), db: Session = Depends(get_db)):
         "recording_required": app.recording_required,
         "accommodation": app.accommodation,
         "mode": settings().mode,
-        "policy_version": "2026-09-v1",
+        "llm_provider": settings().llm_provider,
+        "policy_version": settings().consent_policy,
         "frame_interval_seconds": settings().frame_interval_seconds,
         "session": session_state(db, session) if session else None,
     }
@@ -184,11 +185,19 @@ def candidate_info(auth=Depends(candidate), db: Session = Depends(get_db)):
 @router.post("/consent")
 def consent(data: ConsentInput, auth=Depends(candidate), db: Session = Depends(get_db)):
     app = owned(db, Application, auth.application_id, auth.org_id)
+    if data.policy_version != settings().consent_policy:
+        raise HTTPException(409, "Reload and review the current data-processing disclosure")
     if not data.transcription or not data.ai_evaluation or not data.device_check:
         raise HTTPException(422, "Transcription, AI disclosure acknowledgment, and device check are required")
     if app.recording_required and not data.recording:
         raise HTTPException(409, "Request a recording accommodation before continuing")
-    existing = db.scalar(select(Consent).where(Consent.application_id == app.id, Consent.org_id == auth.org_id))
+    existing = db.scalar(
+        select(Consent).where(
+            Consent.application_id == app.id,
+            Consent.org_id == auth.org_id,
+            Consent.policy_version == data.policy_version,
+        )
+    )
     if existing:
         return {"accepted": True}
     db.add(Consent(org_id=auth.org_id, application_id=app.id, **data.model_dump()))

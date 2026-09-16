@@ -1,0 +1,68 @@
+name: Deploy Talyn development
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+concurrency:
+  group: talyn-development-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AWS_REGION: ap-south-1
+      TALYN_DOMAIN: ${{ vars.TALYN_DOMAIN }}
+      TALYN_CERTIFICATE_ARN: ${{ vars.TALYN_CERTIFICATE_ARN }}
+      TALYN_SENDER_EMAIL: ${{ vars.TALYN_SENDER_EMAIL }}
+      TALYN_ALERT_EMAIL: ${{ vars.TALYN_ALERT_EMAIL }}
+      TALYN_LLM_PROVIDER: ${{ vars.TALYN_LLM_PROVIDER || 'bedrock' }}
+      TALYN_GROQ_SECRET_ARN: ${{ vars.TALYN_GROQ_SECRET_ARN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate deployment configuration
+        run: |
+          test -n "$TALYN_SENDER_EMAIL"
+          test -n "$TALYN_ALERT_EMAIL"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TALYN_AWS_ROLE_ARN }}
+          aws-region: ap-south-1
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+      - name: Build and publish versioned containers
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          for component in api web; do
+            found=$(aws ecr list-images --repository-name "talyn-$component" --query "imageIds[?imageTag=='$IMAGE_TAG'].imageTag" --output text)
+            if [ -z "$found" ]; then
+              folder=backend
+              if [ "$component" = web ]; then folder=frontend; fi
+              docker build -t "$REGISTRY/talyn-$component:$IMAGE_TAG" "$folder"
+              docker push "$REGISTRY/talyn-$component:$IMAGE_TAG"
+            fi
+          done
+      - name: Deploy reviewed CDK resources
+        working-directory: infra
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          npm ci --no-audit --no-fund
+          npx cdk deploy TalynFoundation --require-approval never \
+            -c runtime=true \
+            -c "domain=$TALYN_DOMAIN" -c "certificateArn=$TALYN_CERTIFICATE_ARN" \
+            -c "senderEmail=$TALYN_SENDER_EMAIL" -c "imageTag=$IMAGE_TAG" \
+            -c "alertEmail=$TALYN_ALERT_EMAIL" \
+            -c "llmProvider=$TALYN_LLM_PROVIDER" -c "groqSecretArn=$TALYN_GROQ_SECRET_ARN" \
+            --outputs-file deployment-outputs.json
+      - name: Verify deployed service
+        run: |
+          url=$(jq -r '.TalynFoundation.ApplicationUrl' infra/deployment-outputs.json)
+          curl --fail --retry 6 --retry-delay 10 "$url/api/health"

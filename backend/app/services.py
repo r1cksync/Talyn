@@ -120,7 +120,9 @@ def start_session(db, auth):
         raise HTTPException(409, "Interview is not available")
     consent = db.scalar(
         select(Consent).where(
-            Consent.application_id == app.id, Consent.org_id == app.org_id, Consent.policy_version == "2026-09-v1"
+            Consent.application_id == app.id,
+            Consent.org_id == app.org_id,
+            Consent.policy_version == settings().consent_policy,
         )
     )
     if not consent or not all([consent.transcription, consent.ai_evaluation, consent.device_check]):

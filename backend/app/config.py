@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote
 
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     event_queue_url: str = ""
     kms_key_id: str = ""
     bedrock_model_id: str = "apac.amazon.nova-lite-v1:0"
+    llm_provider: str = "bedrock"
+    groq_api_key: SecretStr = SecretStr("")
+    groq_model_id: str = "openai/gpt-oss-20b"
     sender_email: str = ""
     ses_configuration_set: str = ""
     email_allowlist: str = "success@simulator.amazonses.com"
@@ -41,13 +44,21 @@ class Settings(BaseSettings):
     max_textract_pages: int = 10
     run_demo_worker: bool = True
 
+    @property
+    def consent_policy(self):
+        return "2026-09-v2-groq" if self.mode == "aws" and self.llm_provider == "groq" else "2026-09-v1"
+
     @model_validator(mode="after")
     def validate_deployment(self):
         if self.mode not in {"demo", "aws"}:
             raise ValueError("TALYN_MODE must be demo or aws")
+        if self.llm_provider not in {"bedrock", "groq"}:
+            raise ValueError("Unsupported LLM provider")
         if self.environment == "production" and self.mode != "aws":
             raise ValueError("Production refuses mock/demo adapters")
         if self.mode == "aws":
+            if self.llm_provider == "groq" and not self.groq_api_key.get_secret_value():
+                raise ValueError("Groq requires its server-side secret")
             if not self.public_url.startswith("https://"):
                 raise ValueError("AWS mode requires HTTPS")
             if self.session_secret.startswith("demo-") or len(self.session_secret) < 32:

@@ -1,6 +1,14 @@
 # ADR 001 — AWS interview application
 
-Status: accepted for implementation. Project: `talyn`. Proposed region: `ap-south-1`, pending deployment configuration.
+Status: implemented. Project: `talyn`. Region: `ap-south-1`.
+
+## Authorized changes during implementation
+
+The user has no domain and authorized an AWS-generated test address. CloudFront terminates public HTTPS and connects privately through a VPC origin to an internal ALB. Caching is disabled; cookies and WebSocket headers are forwarded. No domain purchase is needed. The original public HTTPS ALB path remains available with a custom domain/certificate.
+
+The AWS account rejects Bedrock even with root credentials. The user explicitly selected Groq and supplied its key, overriding the original AWS-only LLM restriction. Only structured LLM requests go to Groq; runtime, documents, database, speech, media and email remain on AWS. Secrets Manager holds the key and ECS injects it only into API/worker tasks. Candidate consent version `2026-09-v2-groq` discloses this external processing. The development pilot is limited to two concurrent interviews per organization for free-tier testing.
+
+Sources: [CloudFront VPC origins](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-vpc-origins.html), [Groq limits](https://console.groq.com/docs/rate-limits), [Groq structured outputs](https://console.groq.com/docs/structured-outputs), [Groq data policy](https://console.groq.com/docs/your-data).
 
 ## Decisions
 

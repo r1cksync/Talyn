@@ -169,12 +169,14 @@ test("manager → synthetic document → invitation → consent → media → re
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(
-    () => page.evaluate(() => ({
-      width: document.documentElement.clientWidth,
-      content: document.documentElement.scrollWidth,
-    })),
-  ).toEqual({ width: 390, content: 390 });
+  await expect
+    .poll(() =>
+      page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        content: document.documentElement.scrollWidth,
+      })),
+    )
+    .toEqual({ width: 390, content: 390 });
   await page.screenshot({
     path: "test-results/workspace-mobile.png",
     fullPage: true,

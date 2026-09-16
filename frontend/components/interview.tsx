@@ -702,6 +702,14 @@ export default function Interview() {
             <div className="panel panel-pad" style={{ marginTop: 25 }}>
               <h3>Before we begin</h3>
               <ul className="bullet-list">
+                {info.mode !== "demo" && info.llm_provider === "groq" && (
+                  <li>
+                    This development pilot uses Groq to process interview
+                    planning data and answer text outside AWS. Audio, video,
+                    storage, and speech services remain on AWS. Please use
+                    synthetic test information only.
+                  </li>
+                )}
                 <li>
                   An AI interviewer will ask job-related questions and may ask
                   one follow-up. You can read every question as text.

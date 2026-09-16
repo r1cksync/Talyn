@@ -1,0 +1,1531 @@
+{
+  "region": "ap-south-1",
+  "checks": {
+    "principal": {
+      "status": "passed",
+      "result": {
+        "is_root": true
+      }
+    },
+    "ses": {
+      "status": "passed",
+      "result": {
+        "ProductionAccessEnabled": false,
+        "SendQuota": {
+          "Max24HourSend": 200.0,
+          "MaxSendRate": 1.0,
+          "SentLast24Hours": 0.0
+        },
+        "SendingEnabled": true
+      }
+    },
+    "ses_identities": {
+      "status": "passed",
+      "result": []
+    },
+    "certificates": {
+      "status": "passed",
+      "result": []
+    },
+    "domains": {
+      "status": "passed",
+      "result": []
+    },
+    "model_profile": {
+      "status": "passed",
+      "result": {
+        "status": "ACTIVE"
+      }
+    },
+    "quotas_fargate": {
+      "status": "passed",
+      "result": [
+        {
+          "name": "Fargate Spot Sustained Launch Rate",
+          "value": 20.0
+        },
+        {
+          "name": "Fargate On-Demand Burst Launch Rate",
+          "value": 100.0
+        },
+        {
+          "name": "Fargate Spot vCPU resource count",
+          "value": 6.0
+        },
+        {
+          "name": "Fargate Spot Burst Launch Rate",
+          "value": 100.0
+        },
+        {
+          "name": "Fargate On-Demand Sustained Launch Rate",
+          "value": 20.0
+        },
+        {
+          "name": "Fargate On-Demand vCPU resource count",
+          "value": 6.0
+        }
+      ]
+    },
+    "quotas_transcribe": {
+      "status": "passed",
+      "result": [
+        {
+          "name": "Transactions per second, StartStreamTranscriptionWebSocket",
+          "value": 25.0
+        },
+        {
+          "name": "Transactions per second, StartStreamTranscription",
+          "value": 25.0
+        },
+        {
+          "name": "Number of concurrent streams (HTTP/2 + Websocket)",
+          "value": 25.0
+        }
+      ]
+    },
+    "quotas_bedrock": {
+      "status": "passed",
+      "result": [
+        {
+          "name": "Cross-region model inference requests per minute for Amazon Nova Lite",
+          "value": 0.0
+        },
+        {
+          "name": "Records per batch inference job for Nova Lite V1",
+          "value": 100000.0
+        },
+        {
+          "name": "Sum of in-progress and submitted batch inference jobs using a base model for Nova Lite V1",
+          "value": 100.0
+        },
+        {
+          "name": "Minimum number of records per batch inference job for Nova Lite V1",
+          "value": 100.0
+        },
+        {
+          "name": "Records per input file per batch inference job for Nova Lite V1",
+          "value": 100000.0
+        },
+        {
+          "name": "Batch inference job size (in GB) for Nova Lite V1",
+          "value": 100.0
+        },
+        {
+          "name": "(Knowledge Bases) RetrieveAndGenerateStream requests per second",
+          "value": 20.0
+        },
+        {
+          "name": "Model invocation max tokens per day for Amazon Nova Lite (doubled for cross-region calls)",
+          "value": 0.0
+        },
+        {
+          "name": "Cross-region model inference tokens per minute for Amazon Nova Lite",
+          "value": 0.0
+        },
+        {
+          "name": "Batch inference input file size (in GB) for Nova Lite V1",
+          "value": 1.0
+        }
+      ]
+    },
+    "bedrock_converse": {
+      "status": "blocked",
+      "error_code": "ValidationException"
+    },
+    "polly": {
+      "status": "passed",
+      "result": {
+        "pcm_bytes": 80000
+      }
+    },
+    "transcribe_streaming": {
+      "status": "passed",
+      "result": {
+        "final_segments": 1,
+        "synthetic_transcript": [
+          "This is a synthetic talent connection test."
+        ]
+      }
+    }
+  },
+  "resources_created": [],
+  "regional_rates": [
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m8i.32xlarge-management-hours",
+      "description": "$0.855168 per hour for ECS-Managed-Instances:m8i.32xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.8551680000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6in.24xlarge-management-hours",
+      "description": "$0.653184 per hour for ECS-Managed-Instances:c6in.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6531840000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3en.metal-management-hours",
+      "description": "$1.48032 per hour for ECS-Managed-Instances:i3en.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.4803200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6idn.24xlarge-management-hours",
+      "description": "$0.977184 per hour for ECS-Managed-Instances:m6idn.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.9771840000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3.4xlarge-management-hours",
+      "description": "$0.16992 per hour for ECS-Managed-Instances:i3.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1699200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6in.metal-management-hours",
+      "description": "$1.114212 per hour for ECS-Managed-Instances:m6in.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.1142120000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:g4dn.metal-management-hours",
+      "description": "$0.671736 per hour for ECS-Managed-Instances:g4dn.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6717360000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5d.8xlarge-management-hours",
+      "description": "$0.23424 per hour for ECS-Managed-Instances:m5d.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2342400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-Fargate-ARM-GB-Hours",
+      "description": "AWS Fargate - ARM - Memory - Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0026100000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r6a.4xlarge-management-hours",
+      "description": "$0.06864 per hour for ECS-Managed-Instances:r6a.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0686400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c8g.16xlarge-management-hours",
+      "description": "$0.207288 per hour for ECS-Managed-Instances:c8g.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2072880000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3en.24xlarge-management-hours",
+      "description": "$1.48032 per hour for ECS-Managed-Instances:i3en.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.4803200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6id.12xlarge-management-hours",
+      "description": "$0.299376 per hour for ECS-Managed-Instances:c6id.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2993760000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6a.12xlarge-management-hours",
+      "description": "$0.159984 per hour for ECS-Managed-Instances:m6a.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1599840000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:t3a.xlarge-management-hours",
+      "description": "$0.011832 per hour for ECS-Managed-Instances:t3a.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0118320000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5d.large-management-hours",
+      "description": "$0.01812 per hour for ECS-Managed-Instances:r5d.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0181200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i7i.12xlarge-management-hours",
+      "description": "$0.616812 per hour for ECS-Managed-Instances:i7i.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6168120000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-Fargate-Windows-GB-Hours",
+      "description": "AWS Fargate - Windows - Memory  - Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0053532500",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:u7i-8tb.112xlarge-management-hours",
+      "description": "$10.365336 per hour for ECS-Managed-Instances:u7i-8tb.112xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "10.3653360000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:t3.small-management-hours",
+      "description": "$0.002688 per hour for ECS-Managed-Instances:t3.small-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0026880000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6in.4xlarge-management-hours",
+      "description": "$0.139272 per hour for ECS-Managed-Instances:m6in.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1392720000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5.xlarge-management-hours",
+      "description": "$0.02424 per hour for ECS-Managed-Instances:m5.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0242400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r6i.large-management-hours",
+      "description": "$0.0156 per hour for ECS-Managed-Instances:r6i.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0156000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i4i.16xlarge-management-hours",
+      "description": "$0.7476 per hour for ECS-Managed-Instances:i4i.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.7476000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i4g.xlarge-management-hours",
+      "description": "$0.04206 per hour for ECS-Managed-Instances:i4g.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0420600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6a.large-management-hours",
+      "description": "$0.006672 per hour for ECS-Managed-Instances:m6a.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0066720000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5n.large-management-hours",
+      "description": "$0.01488 per hour for ECS-Managed-Instances:m5n.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0148800000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6i.4xlarge-management-hours",
+      "description": "$0.09696 per hour for ECS-Managed-Instances:m6i.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0969600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6in.xlarge-management-hours",
+      "description": "$0.034824 per hour for ECS-Managed-Instances:m6in.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0348240000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c7g.16xlarge-management-hours",
+      "description": "$0.188472 per hour for ECS-Managed-Instances:c7g.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1884720000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7gd.8xlarge-management-hours",
+      "description": "$0.13632 per hour for ECS-Managed-Instances:m7gd.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1363200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6g.8xlarge-management-hours",
+      "description": "$0.081792 per hour for ECS-Managed-Instances:c6g.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0817920000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3.16xlarge-management-hours",
+      "description": "$0.67968 per hour for ECS-Managed-Instances:i3.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6796800000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6g.metal-management-hours",
+      "description": "$0.194304 per hour for ECS-Managed-Instances:m6g.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1943040000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c8g.large-management-hours",
+      "description": "$0.00648 per hour for ECS-Managed-Instances:c8g.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0064800000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r6a.16xlarge-management-hours",
+      "description": "$0.27456 per hour for ECS-Managed-Instances:r6a.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2745600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6g.xlarge-management-hours",
+      "description": "$0.012144 per hour for ECS-Managed-Instances:m6g.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0121440000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:g6.16xlarge-management-hours",
+      "description": "$0.3181542 per hour for ECS-Managed-Instances:g6.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.3181542000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5d.16xlarge-management-hours",
+      "description": "$0.46848 per hour for ECS-Managed-Instances:m5d.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.4684800000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c5.metal-management-hours",
+      "description": "$0.4896 per hour for ECS-Managed-Instances:c5.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.4896000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r7a.16xlarge-management-hours",
+      "description": "$0.602808 per hour for ECS-Managed-Instances:r7a.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6028080000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6idn.large-management-hours",
+      "description": "$0.020364 per hour for ECS-Managed-Instances:m6idn.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0203640000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m8i.xlarge-management-hours",
+      "description": "$0.026724 per hour for ECS-Managed-Instances:m8i.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0267240000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:im4gn.2xlarge-management-hours",
+      "description": "$0.09912 per hour for ECS-Managed-Instances:im4gn.2xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0991200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i8g.8xlarge-management-hours",
+      "description": "$0.373824 per hour for ECS-Managed-Instances:i8g.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.3738240000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:x2iedn.16xlarge-management-hours",
+      "description": "$1.65144 per hour for ECS-Managed-Instances:x2iedn.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.6514400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5a.large-management-hours",
+      "description": "$0.00672 per hour for ECS-Managed-Instances:m5a.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0067200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7i.8xlarge-management-hours",
+      "description": "$0.203616 per hour for ECS-Managed-Instances:m7i.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2036160000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3en.xlarge-management-hours",
+      "description": "$0.06168 per hour for ECS-Managed-Instances:i3en.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0616800000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6g.medium-management-hours",
+      "description": "$0.003036 per hour for ECS-Managed-Instances:m6g.medium-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0030360000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3en.3xlarge-management-hours",
+      "description": "$0.18504 per hour for ECS-Managed-Instances:i3en.3xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1850400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c5d.4xlarge-management-hours",
+      "description": "$0.09504 per hour for ECS-Managed-Instances:c5d.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0950400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7i.4xlarge-management-hours",
+      "description": "$0.101808 per hour for ECS-Managed-Instances:m7i.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1018080000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c7gd.xlarge-management-hours",
+      "description": "$0.013824 per hour for ECS-Managed-Instances:c7gd.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0138240000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7i.24xlarge-management-hours",
+      "description": "$0.610848 per hour for ECS-Managed-Instances:m7i.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6108480000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6g.4xlarge-management-hours",
+      "description": "$0.040896 per hour for ECS-Managed-Instances:c6g.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0408960000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c5d.metal-management-hours",
+      "description": "$0.57024 per hour for ECS-Managed-Instances:c5d.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.5702400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6a.48xlarge-management-hours",
+      "description": "$0.53856 per hour for ECS-Managed-Instances:c6a.48xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.5385600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c5n.2xlarge-management-hours",
+      "description": "$0.05184 per hour for ECS-Managed-Instances:c5n.2xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0518400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c7g.medium-management-hours",
+      "description": "$0.00294 per hour for ECS-Managed-Instances:c7g.medium-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0029400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6i.metal-management-hours",
+      "description": "$0.6528 per hour for ECS-Managed-Instances:c6i.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6528000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r7a.24xlarge-management-hours",
+      "description": "$0.9042 per hour for ECS-Managed-Instances:r7a.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.9042000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i4i.large-management-hours",
+      "description": "$0.0234 per hour for ECS-Managed-Instances:i4i.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0234000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r7a.4xlarge-management-hours",
+      "description": "$0.150696 per hour for ECS-Managed-Instances:r7a.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1506960000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:t4g.small-management-hours",
+      "description": "$0.001344 per hour for ECS-Managed-Instances:t4g.small-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0013440000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7i.metal-24xl-management-hours",
+      "description": "$0.610848 per hour for ECS-Managed-Instances:m7i.metal-24xl-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6108480000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5a.large-management-hours",
+      "description": "$0.00864 per hour for ECS-Managed-Instances:r5a.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0086400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c7g.2xlarge-management-hours",
+      "description": "$0.023556 per hour for ECS-Managed-Instances:c7g.2xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0235560000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r7i.metal-24xl-management-hours",
+      "description": "$0.78624 per hour for ECS-Managed-Instances:r7i.metal-24xl-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.7862400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i4i.metal-management-hours",
+      "description": "$1.49532 per hour for ECS-Managed-Instances:i4i.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.4953200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:g6f.2xlarge-management-hours",
+      "description": "$0.0444912 per hour for ECS-Managed-Instances:g6f.2xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0444912000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r8g.medium-management-hours",
+      "description": "$0.004956 per hour for ECS-Managed-Instances:r8g.medium-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0049560000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3.large-management-hours",
+      "description": "$0.02124 per hour for ECS-Managed-Instances:i3.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0212400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i4g.8xlarge-management-hours",
+      "description": "$0.336444 per hour for ECS-Managed-Instances:i4g.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.3364440000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m7i.metal-48xl-management-hours",
+      "description": "$1.221696 per hour for ECS-Managed-Instances:m7i.metal-48xl-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.2216960000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5a.12xlarge-management-hours",
+      "description": "$0.20592 per hour for ECS-Managed-Instances:r5a.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2059200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6gd.xlarge-management-hours",
+      "description": "$0.01176 per hour for ECS-Managed-Instances:c6gd.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0117600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:hpc7a.12xlarge-management-hours",
+      "description": "$0.864 per hour for ECS-Managed-Instances:hpc7a.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.8640000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i3en.large-management-hours",
+      "description": "$0.03084 per hour for ECS-Managed-Instances:i3en.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0308400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c7gd.large-management-hours",
+      "description": "$0.006912 per hour for ECS-Managed-Instances:c7gd.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0069120000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m8g.16xlarge-management-hours",
+      "description": "$0.246372 per hour for ECS-Managed-Instances:m8g.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.2463720000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r8g.8xlarge-management-hours",
+      "description": "$0.158556 per hour for ECS-Managed-Instances:r8g.8xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1585560000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m8i.24xlarge-management-hours",
+      "description": "$0.641376 per hour for ECS-Managed-Instances:m8i.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.6413760000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Anywhere-Instance-hours",
+      "description": "$0.01025 per hour for ECS-Anywhere-Instance-Hours",
+      "unit": "hours",
+      "usd": "0.0102500000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5ad.large-management-hours",
+      "description": "$0.00996 per hour for ECS-Managed-Instances:r5ad.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0099600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:t3.large-management-hours",
+      "description": "$0.010752 per hour for ECS-Managed-Instances:t3.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0107520000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r6id.metal-management-hours",
+      "description": "$1.218048 per hour for ECS-Managed-Instances:r6id.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "1.2180480000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c5.4xlarge-management-hours",
+      "description": "$0.0816 per hour for ECS-Managed-Instances:c5.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0816000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m6a.24xlarge-management-hours",
+      "description": "$0.319968 per hour for ECS-Managed-Instances:m6a.24xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.3199680000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5d.large-management-hours",
+      "description": "$0.01464 per hour for ECS-Managed-Instances:m5d.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0146400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m5n.16xlarge-management-hours",
+      "description": "$0.47616 per hour for ECS-Managed-Instances:m5n.16xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.4761600000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5ad.xlarge-management-hours",
+      "description": "$0.01992 per hour for ECS-Managed-Instances:r5ad.xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0199200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:i7i.large-management-hours",
+      "description": "$0.025704 per hour for ECS-Managed-Instances:i7i.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0257040000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5.metal-management-hours",
+      "description": "$0.7488 per hour for ECS-Managed-Instances:r5.metal-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.7488000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5a.2xlarge-management-hours",
+      "description": "$0.03432 per hour for ECS-Managed-Instances:r5a.2xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0343200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6in.large-management-hours",
+      "description": "$0.013608 per hour for ECS-Managed-Instances:c6in.large-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0136080000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:r5a.4xlarge-management-hours",
+      "description": "$0.06864 per hour for ECS-Managed-Instances:r5a.4xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.0686400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:c6gd.12xlarge-management-hours",
+      "description": "$0.14112 per hour for ECS-Managed-Instances:c6gd.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1411200000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonECS",
+      "usage": "APS3-ECS-Managed-Instances:m8g.12xlarge-management-hours",
+      "description": "$0.184776 per hour for ECS-Managed-Instances:m8g.12xlarge-management-hours in Asia Pacific (Mumbai)",
+      "unit": "hours",
+      "usd": "0.1847760000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRDS",
+      "usage": "APS3-InstanceUsage:db.t4g.micro",
+      "description": "$ 0.021 per RDS db.t4g.micro Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "unit": "Hrs",
+      "usd": "0.0210000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-Outposts-LoadBalancerUsage",
+      "description": "$0.0239 per Hrs for Outposts-LoadBalancerUsage:LoadBalancing:Application in Asia Pacific (Mumbai)",
+      "unit": "Hrs",
+      "usd": "0.0239000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-TS-LoadBalancerUsage",
+      "description": "$0.0053 per associated Application load balancer Trust Store unit-hour ",
+      "unit": "Hrs",
+      "usd": "0.0053000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LoadBalancerUsage",
+      "description": "$0.0239per Network LoadBalancer-hour (or partial hour)",
+      "unit": "Hrs",
+      "usd": "0.0239000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LoadBalancerUsage",
+      "description": "$0.0266 per LoadBalancer-hour (or partial hour)",
+      "unit": "Hrs",
+      "usd": "0.0266000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LCUUsage",
+      "description": "$0.008 per used Application load balancer capacity unit-hour (or partial hour)",
+      "unit": "LCU-Hrs",
+      "usd": "0.0080000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LCUUsage",
+      "description": "$0.006 per used Network load balancer capacity unit-hour (or partial hour)",
+      "unit": "LCU-Hrs",
+      "usd": "0.0060000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-ReservedLCUUsage",
+      "description": "$0.008 per reserved Application load balancer capacity unit-hour",
+      "unit": "ReservedLCU-Hr",
+      "usd": "0.0080000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-DataProcessing-Bytes",
+      "description": "$0.008 per GB Data Processed by the LoadBalancer",
+      "unit": "GB",
+      "usd": "0.0080000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LoadBalancerUsage",
+      "description": "$0.0133 per Gateway LoadBalancer-hour (or partial hour) in Asia Pacific (Mumbai)",
+      "unit": "Hrs",
+      "usd": "0.0133000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LCUUsage",
+      "description": "$0.0040 per used Gateway load balancer capacity unit-hour (or partial hour) in Asia Pacific (Mumbai)",
+      "unit": "LCU-Hrs",
+      "usd": "0.0040000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AWSELB",
+      "usage": "APS3-LoadBalancerUsage",
+      "description": "$0.0239 per Application LoadBalancer-hour (or partial hour)",
+      "unit": "Hrs",
+      "usd": "0.0239000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonPolly",
+      "usage": "APS3-SynthesizeSpeechNeural-Characters",
+      "description": "$16 per million characters for SynthesizeSpeechNeural-Characters in Asia Pacific (Mumbai)",
+      "unit": "Characters",
+      "usd": "0.0000160000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonPolly",
+      "usage": "APS3-SynthesizeSpeech-Characters",
+      "description": "$4 per million characters",
+      "unit": "Characters",
+      "usd": "0.0000040000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-FaceVectorsStored",
+      "description": "Storage: 0.012 USD per 1000 Faces stored per month",
+      "unit": "Faces-Mo",
+      "usd": "0.0000120000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group1-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 5M-30M images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0007500000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group1-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier: 35M+ images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0005000000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group1-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 0 - 1000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0012500000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group1-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 1000000 - 5000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0010000000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-minutestrained-custommoderation",
+      "description": "Custom Labels Training: USD $0.0.08333333 per minute ($5 per hour) for Asia Pacific (Mumbai)",
+      "unit": "minutes",
+      "usd": "0.0833333300",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 1000000 - 5000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0010000000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier: 35M+ images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0003125000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 5M-30M images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0007500000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-ImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 0 - 1000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0012500000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-minutestrained",
+      "description": "USD0.016667 per minutes for minutestrained in Asia Pacific (Mumbai)",
+      "unit": "minutes",
+      "usd": "0.0166670000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-StreamingCalls",
+      "description": "$0.018 per API call for 0-500K streaming calls in Asia Pacific (Mumbai)",
+      "unit": "API Calls",
+      "usd": "0.0180000000",
+      "begin": "0",
+      "end": "500000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-StreamingCalls",
+      "description": "$0.015 per API call for 500K-3M streaming calls in Asia Pacific (Mumbai)",
+      "unit": "API Calls",
+      "usd": "0.0150000000",
+      "begin": "500000",
+      "end": "3000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-StreamingCalls",
+      "description": "$0.012 per API call for >3M streaming calls in Asia Pacific (Mumbai)",
+      "unit": "API Calls",
+      "usd": "0.0120000000",
+      "begin": "3000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-AsyncImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 5M-35M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0009000000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-AsyncImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 1M-5M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0012000000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-AsyncImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 0-1M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0015000000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-AsyncImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 35M+ images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0003750000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-MinsOfArchVideoProcessed",
+      "description": "MinsOfArchVideoProcessed: 0.12 USD per minute of Archived Video processed",
+      "unit": "Minutes Processed",
+      "usd": "0.1200000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-inferenceminutes",
+      "description": "USD0.066667 per minutes for inferenceminutes in Asia Pacific (Mumbai)",
+      "unit": "minutes",
+      "usd": "0.0666670000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-MinsOfArchVideoProcessed:Shot",
+      "description": "$0.06 per Minutes Processed for MinsOfArchVideoProcessed:Shot in Asia Pacific (Mumbai)",
+      "unit": "Minutes Processed",
+      "usd": "0.0600000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 0-1M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0015000000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 5M-35M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0009000000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 1M-5M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0012000000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed-CustomModeration",
+      "description": "Images Processed for Custom Moderation: Non Free Tier: 35M+ images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0003750000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImageProperties-ImagesProcessed",
+      "description": "Images Processed for Image Properties: Non Free Tier: 1M-5M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0007500000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImageProperties-ImagesProcessed",
+      "description": "Images Processed for Image Properties: Non Free Tier: 35M+ images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0002344000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImageProperties-ImagesProcessed",
+      "description": "Images Processed for Image Properties: Non Free Tier: 0-1M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0009380000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImageProperties-ImagesProcessed",
+      "description": "Images Processed for Image Properties: Non Free Tier: 5M-35M images per month in Asia Pacific (Mumbai)",
+      "unit": "Images Processed",
+      "usd": "0.0005630000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-MinsOfLiveVideoProcessed",
+      "description": "Number of minutes of Live stream video processed using StreamProcessor APIs",
+      "unit": "Minutes Processed",
+      "usd": "0.0098400000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-MinsOfArchVideoProcessed:TechCue",
+      "description": "$0.06 per Minutes Processed for MinsOfArchVideoProcessed:TechCue in Asia Pacific (Mumbai)",
+      "unit": "Minutes Processed",
+      "usd": "0.0600000000",
+      "begin": "0",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-AsyncImagesProcessed",
+      "description": "Images Processed: Non Free Tier: 35M+ images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0003125000",
+      "begin": "35000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-AsyncImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 1000000 - 5000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0010000000",
+      "begin": "1000000",
+      "end": "5000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-AsyncImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 5M-30M images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0007500000",
+      "begin": "5000000",
+      "end": "35000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-Group2-AsyncImagesProcessed",
+      "description": "Images Processed: Non Free Tier : 0 - 1000000 images processed per month",
+      "unit": "Images Processed",
+      "usd": "0.0012500000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed",
+      "description": "Images Processed: 10,000,001 - 100MM images processed per month, 0.72 USD per 1000 images per 1000 images processed.",
+      "unit": "Images Processed",
+      "usd": "0.0007200000",
+      "begin": "10000000",
+      "end": "100000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed",
+      "description": "Images Processed: 1,000,001 - 10 MM images processed per month, 0.96 USD per 1000 images processed.",
+      "unit": "Images Processed",
+      "usd": "0.0009600000",
+      "begin": "1000000",
+      "end": "10000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed",
+      "description": "Images Processed: 100MM+ images processed per month, 0.48 USD per 1000 images per 1000 images processed.",
+      "unit": "Images Processed",
+      "usd": "0.0004800000",
+      "begin": "100000000",
+      "end": "Inf"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-ImagesProcessed",
+      "description": "Images Processed: 5001 - 1 MM images processed per month, 1.20 USD per 1000 images processed.",
+      "unit": "Images Processed",
+      "usd": "0.0012000000",
+      "begin": "0",
+      "end": "1000000"
+    },
+    {
+      "service": "AmazonRekognition",
+      "usage": "APS3-UserVectorsStored",
+      "description": "Storage: 0.012 USD per 1000 Faces stored per month",
+      "unit": "Users-Mo",
+      "usd": "0.0000120000",
+      "begin": "0",
+      "end": "Inf"
+    }
+  ]
+}

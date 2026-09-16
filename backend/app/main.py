@@ -88,7 +88,7 @@ def health():
 
 @app.get("/api/config")
 def public_config():
-    return {"mode": settings().mode, "policy_version": "2026-09-v1"}
+    return {"mode": settings().mode, "policy_version": settings().consent_policy}
 
 
 def object_claims(token, operation):

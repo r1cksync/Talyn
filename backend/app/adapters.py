@@ -3,9 +3,11 @@
 import base64
 import hashlib
 import json
+import time
 
 import boto3
 import jwt
+import httpx
 from botocore.config import Config
 
 from .config import settings
@@ -142,6 +144,8 @@ class Models:
     def structured(self, schema, instruction, payload, fixture):
         if settings().mode == "demo":
             return schema.model_validate(fixture), {"inputTokens": 0, "outputTokens": 0}
+        if settings().llm_provider == "groq":
+            return self.groq_structured(schema, instruction, payload)
         response = aws("bedrock-runtime").converse(
             modelId=settings().bedrock_model_id,
             system=[
@@ -161,6 +165,60 @@ class Models:
         text = "".join(part.get("text", "") for part in response["output"]["message"]["content"]).strip()
         # Never repair arbitrary prose into a successful result. Retry is bounded by graph policy and usage budget.
         return schema.model_validate_json(text), response.get("usage", {})
+
+    def groq_structured(self, schema, instruction, payload):
+        # Fixed provider endpoint; untrusted content cannot choose a URL or enable tools.
+        request = {
+            "model": settings().groq_model_id,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": SYSTEM_POLICY
+                    + "\nTask: "
+                    + instruction
+                    + "\nSchema: "
+                    + json.dumps(schema.model_json_schema()),
+                },
+                {"role": "user", "content": json.dumps({"untrusted_data": payload}, ensure_ascii=False)},
+            ],
+            "response_format": {"type": "json_object"},
+            "reasoning_effort": "low",
+            "temperature": 0.1,
+            "max_completion_tokens": 3500,
+        }
+        # Bound free-tier requests; reject overlarge inputs explicitly instead of silently dropping evidence.
+        if len(json.dumps(request)) > 24000:
+            raise ValueError(
+                "Model input exceeds the development provider limit; use shorter synthetic documents/interviews"
+            )
+        with httpx.Client(timeout=httpx.Timeout(60, connect=5)) as client:
+            for attempt in range(3):
+                response = client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    json=request,
+                    headers={"Authorization": "Bearer " + settings().groq_api_key.get_secret_value()},
+                )
+                if response.status_code != 429 or attempt == 2:
+                    break
+                try:
+                    delay = float(response.headers.get("retry-after", "10"))
+                except ValueError:
+                    delay = 10
+                if delay > 20:
+                    raise RuntimeError("Groq free-tier quota reached; retry the job after the quota resets")
+                time.sleep(max(1, delay))
+        if response.status_code >= 400:
+            # Provider errors can contain prompt excerpts. Keep them out of normal logs.
+            raise RuntimeError(
+                f"Groq request failed (HTTP {response.status_code}); check provider quota and configuration"
+            )
+        data = response.json()
+        choice = data["choices"][0]
+        if choice.get("finish_reason") != "stop":
+            raise ValueError("Model output was incomplete; no assessment was persisted")
+        result = schema.model_validate_json(choice["message"]["content"])
+        usage = data.get("usage", {})
+        return result, {"inputTokens": usage.get("prompt_tokens", 0), "outputTokens": usage.get("completion_tokens", 0)}
 
 
 models = Models()
