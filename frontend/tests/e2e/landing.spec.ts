@@ -15,6 +15,10 @@ test("landing navigation, motion preference and responsive workspace", async ({
     path: "test-results/landing-desktop.png",
     fullPage: true,
   });
+  await page.getByRole("link", { name: "Open your workspace" }).click();
+  await expect(page).toHaveURL(/\/workspace$/);
+  await expect(page.getByLabel("Work email")).toBeVisible();
+  await page.goto("/");
   await page.locator("summary").first().click();
   await expect(
     page.getByText("Assessments link to transcript excerpts.", {

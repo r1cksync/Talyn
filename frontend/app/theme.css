@@ -421,9 +421,6 @@ td,
 }
 
 /* Public landing page */
-.landing {
-  overflow: clip;
-}
 .landing h2,
 .landing h3 {
   font-family: var(--display);
@@ -504,6 +501,9 @@ td,
 }
 .hero-type {
   display: grid;
+  /* Clip oversized decoration locally. Clipping the entire scrolling page
+     causes Chromium hit testing to drift from the visible links. */
+  overflow: clip;
   gap: 10px;
   margin-left: -24px;
 }
