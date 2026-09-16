@@ -66,14 +66,18 @@ export async function checksum(blob: Blob) {
 export async function uploadFile(
   upload: { url: string; method: string; headers: Record<string, string> },
   blob: Blob,
+  signal?: AbortSignal,
 ) {
   const result = await fetch(upload.url, {
     method: upload.method,
     headers: upload.headers,
     body: blob,
+    signal,
   });
   if (!result.ok)
-    throw new Error("Upload failed. Check the connection and retry.");
+    throw new Error(
+      `Upload failed (HTTP ${result.status}). Check the connection and retry.`,
+    );
 }
 export const readable = (value: string) =>
   value.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());

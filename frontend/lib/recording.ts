@@ -1,4 +1,16 @@
-import { api, checksum, post, uploadFile } from "./api";
+import { api, checksum, uploadFile } from "./api";
+
+function recordingPost(path: string, body?: unknown) {
+  return api(
+    path,
+    {
+      method: "POST",
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(20000),
+    },
+    true,
+  );
+}
 type Clip = {
   key: string;
   session: string;
@@ -84,9 +96,21 @@ export class ClipRecorder {
     private startedAt: number,
     private onStatus: (s: string) => void,
     private onError: (e: Error) => void,
+    private onActive: (active: boolean) => void = () => {},
   ) {}
+  get active() {
+    return this.running;
+  }
   async start() {
-    const status = await api("/candidate/recordings/status", {}, true);
+    if (this.running) return;
+    // Finish any queued capture/upload before retrying; never allocate overlapping sequences.
+    await this.stop();
+    this.onStatus("Recovering saved recording clips…");
+    const status = await api(
+      "/candidate/recordings/status",
+      { signal: AbortSignal.timeout(20000) },
+      true,
+    );
     const saved = await pending(this.session);
     this.sequence = Math.max(
       status.next_sequence,
@@ -95,30 +119,31 @@ export class ClipRecorder {
     );
     for (const clip of saved) await this.upload(clip);
     this.running = true;
+    this.onActive(true);
     this.next();
+    this.onStatus("Recording active");
   }
   private async upload(clip: Clip) {
     let last: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const result = await post(
-          "/candidate/recordings",
-          {
-            sequence: clip.sequence,
-            sha256: await checksum(clip.blob),
-            size: clip.blob.size,
-            content_type: clip.content_type,
-            start_ms: clip.start_ms,
-            end_ms: clip.end_ms,
-          },
-          true,
-        );
+        const result = await recordingPost("/candidate/recordings", {
+          sequence: clip.sequence,
+          sha256: await checksum(clip.blob),
+          size: clip.blob.size,
+          content_type: clip.content_type,
+          start_ms: clip.start_ms,
+          end_ms: clip.end_ms,
+        });
         if (!result.verified) {
-          await uploadFile(result.upload, clip.blob);
-          await post(
+          await uploadFile(
+            result.upload,
+            clip.blob,
+            AbortSignal.timeout(30000),
+          );
+          await recordingPost(
             `/candidate/recordings/${result.id}/complete`,
             undefined,
-            true,
           );
         }
         await remove(clip.key);
@@ -126,7 +151,8 @@ export class ClipRecorder {
         return;
       } catch (e) {
         last = e;
-        await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+        if (attempt < 2)
+          await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
       }
     }
     throw last;
@@ -135,6 +161,8 @@ export class ClipRecorder {
     if (!this.running) return;
     const type = recordingType();
     if (!type) {
+      this.running = false;
+      this.onActive(false);
       this.onError(
         new Error(
           "This browser cannot record supported video. Please request an accommodation.",
@@ -170,22 +198,31 @@ export class ClipRecorder {
             const backlog = await pending(this.session);
             if (backlog.length > 3) {
               this.running = false;
-              throw new Error(
-                "Uploads are delayed. Recording paused to limit local storage. Reconnect and resume.",
+              this.onActive(false);
+              this.onError(
+                new Error(
+                  "Recording paused while uploads catch up. Saved clips are kept on this device. Use Retry uploads and resume to continue.",
+                ),
               );
             }
+            // Queue this clip even when capture pauses: the final saved clip must not be stranded.
             this.uploads = this.uploads
               .then(() => this.upload(clip))
               .catch((e) => {
-                this.error = e;
                 this.running = false;
-                this.onError(e);
+                this.onActive(false);
+                this.onError(
+                  new Error(
+                    `Recording paused. Saved clips are kept on this device. Retry uploads and resume. ${e instanceof Error ? e.message : "The upload was interrupted."}`,
+                  ),
+                );
               });
             this.next();
           })
           .catch((e) => {
             this.error = e;
             this.running = false;
+            this.onActive(false);
             this.onError(e);
           })
           .finally(resolve);
@@ -193,9 +230,11 @@ export class ClipRecorder {
     });
     this.recorder.onerror = () => {
       this.running = false;
-      this.onError(
-        new Error("Camera recording stopped. Check permissions and reconnect."),
+      this.onActive(false);
+      this.error = new Error(
+        "Camera recording stopped. Check permissions and reconnect.",
       );
+      this.onError(this.error);
     };
     this.recorder.start();
     this.timer = setTimeout(() => {
@@ -204,6 +243,7 @@ export class ClipRecorder {
   }
   async stop() {
     this.running = false;
+    this.onActive(false);
     clearTimeout(this.timer);
     if (this.recorder?.state === "recording") this.recorder.stop();
     await this.finishClip;
@@ -213,7 +253,11 @@ export class ClipRecorder {
   }
   async finalize() {
     await this.stop();
-    const status = await api("/candidate/recordings/status", {}, true);
+    const status = await api(
+      "/candidate/recordings/status",
+      { signal: AbortSignal.timeout(20000) },
+      true,
+    );
     const saved = await pending(this.session);
     const expected = Math.max(
       this.sequence,
@@ -223,10 +267,9 @@ export class ClipRecorder {
     );
     for (const clip of saved) await this.upload(clip);
     for (let attempt = 0; attempt < 12; attempt++) {
-      const result = await post(
+      const result = await recordingPost(
         "/candidate/recordings/finalize-manifest",
         { expected_clips: expected },
-        true,
       );
       if (result.finalized) return result;
       this.onStatus("Verifying recording clips…");

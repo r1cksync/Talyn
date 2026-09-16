@@ -60,6 +60,9 @@ export default function Interview() {
   const [demoText, setDemoText] = useState("");
   const [time, setTime] = useState(0);
   const [mediaStatus, setMediaStatus] = useState("Not recording");
+  const [recordingActive, setRecordingActive] = useState(false);
+  const [mediaRecoveryNeeded, setMediaRecoveryNeeded] = useState(false);
+  const [recoveringMedia, setRecoveringMedia] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
   const [observations, setObservations] = useState<any[]>([]);
   const stream = useRef<MediaStream | null>(null);
@@ -127,7 +130,7 @@ export default function Interview() {
       stream.current?.getTracks().forEach((t) => t.stop());
       void audioContext.current?.close();
       if (heart.current) clearInterval(heart.current);
-      void recorder.current?.stop();
+      void recorder.current?.stop().catch(() => {});
       audioPlayer.current?.pause();
     };
   }, [loadInfo]);
@@ -167,14 +170,7 @@ export default function Interview() {
   useEffect(() => {
     if (session?.status !== "completed") return;
     void stopAudio();
-    if (recordConsent)
-      void (
-        recorder.current
-          ? recorder.current.finalize()
-          : recoverRecording(session.id, setMediaStatus)
-      )
-        .then(() => setMediaStatus("Recording verified"))
-        .catch((e) => setError(e.message));
+    if (recordConsent) void finishRecording(session.id);
     const load = () => {
       void api("/candidate/report", {}, true)
         .then(setFeedback)
@@ -249,19 +245,35 @@ export default function Interview() {
     if (video.current) video.current.srcObject = stream.current;
   }
   async function ensureRecording(s: Session) {
-    if (recordConsent && stream.current && !recorder.current) {
-      recorder.current = new ClipRecorder(
-        stream.current,
-        s.id,
-        Date.parse(s.started_at) - clockOffset.current,
-        setMediaStatus,
-        (e) => {
-          setError(e.message);
-          void stopAudio();
-        },
-      );
-      await recorder.current.start();
-      setMediaStatus("Recording active");
+    if (recordConsent && stream.current) {
+      if (!recorder.current)
+        recorder.current = new ClipRecorder(
+          stream.current,
+          s.id,
+          Date.parse(s.started_at) - clockOffset.current,
+          setMediaStatus,
+          (e) => {
+            setError(e.message);
+            void stopAudio();
+          },
+          setRecordingActive,
+        );
+      if (!recorder.current.active) await recorder.current.start();
+    }
+  }
+  async function finishRecording(sessionId: string) {
+    setRecoveringMedia(true);
+    setMediaRecoveryNeeded(false);
+    try {
+      if (recorder.current) await recorder.current.finalize();
+      else await recoverRecording(sessionId, setMediaStatus);
+      setMediaStatus("Recording verified");
+    } catch (e) {
+      setMediaRecoveryNeeded(true);
+      setMediaStatus("Some recording clips still need to upload or verify.");
+      setError((e as Error).message);
+    } finally {
+      setRecoveringMedia(false);
     }
   }
   async function begin() {
@@ -661,6 +673,31 @@ export default function Interview() {
                   {mediaStatus}
                 </Badge>
               )}
+              {recordConsent && recoveringMedia && (
+                <p role="status">
+                  Uploading and verifying saved recording clips… Keep this tab
+                  open.
+                </p>
+              )}
+              {recordConsent && mediaRecoveryNeeded && (
+                <div className="notice info" style={{ marginTop: 20 }}>
+                  <p>
+                    Your interview is complete. Saved recording clips can still
+                    be recovered from this device for 24 hours. Keep this site's
+                    data until uploads finish.
+                  </p>
+                  <Button
+                    type="button"
+                    busy={recoveringMedia}
+                    onClick={() => {
+                      setError("");
+                      void finishRecording(session.id);
+                    }}
+                  >
+                    Retry saved uploads
+                  </Button>
+                </div>
+              )}
               {!feedback ? (
                 <div className="notice info" style={{ marginTop: 20 }}>
                   Your feedback is being prepared. You may close this page and
@@ -1027,14 +1064,39 @@ export default function Interview() {
                     Reconnect devices
                   </Button>
                 )}
+                {deviceReady && recordConsent && !recordingActive && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    busy={busy}
+                    disabled={speaking}
+                    onClick={() =>
+                      void act(async () => {
+                        const latest = await api<Session>(
+                          "/candidate/session",
+                          {},
+                          true,
+                        );
+                        updateSession(latest);
+                        if (latest.status === "active") await connectAudio();
+                      })
+                    }
+                  >
+                    Retry uploads and resume
+                  </Button>
+                )}
                 <div className="panel panel-pad">
                   <div
                     className={
-                      recordConsent && deviceReady ? "recording-indicator" : ""
+                      recordConsent && recordingActive
+                        ? "recording-indicator"
+                        : ""
                     }
                   >
-                    {recordConsent && deviceReady
-                      ? "Recording enabled"
+                    {recordConsent
+                      ? recordingActive
+                        ? "Recording active"
+                        : "Recording paused"
                       : "Camera-free interview"}
                   </div>
                   <p className="small" style={{ marginTop: 8 }}>
