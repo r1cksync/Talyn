@@ -17,6 +17,16 @@ AWS_CONFIG = Config(connect_timeout=5, read_timeout=60, retries={"max_attempts":
 
 
 def aws(service):
+    if service == "s3":
+        # Presigning otherwise uses the legacy global endpoint. New regional
+        # buckets redirect it, invalidating browser uploads and CORS preflights.
+        region = settings().region
+        return boto3.client(
+            service,
+            region_name=region,
+            endpoint_url=f"https://s3.{region}.amazonaws.com",
+            config=AWS_CONFIG.merge(Config(signature_version="s3v4", s3={"addressing_style": "virtual"})),
+        )
     return boto3.client(service, region_name=settings().region, config=AWS_CONFIG)
 
 
