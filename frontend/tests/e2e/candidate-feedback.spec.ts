@@ -1,5 +1,53 @@
 import { test, expect } from "@playwright/test";
 
+test("new invitation takes precedence over an existing candidate session", async ({
+  page,
+}) => {
+  let previousSessionRequests = 0;
+  const token = "synthetic-new-invitation-token-for-browser-test";
+  await page.route("**/api/candidate/me", async (route) => {
+    previousSessionRequests++;
+    await route.fulfill({
+      json: { application_id: "previous-completed-interview" },
+    });
+  });
+  const requestedTokens: string[] = [];
+  await page.route("**/api/candidate/access/request", async (route) => {
+    requestedTokens.push(route.request().postDataJSON().token);
+    await route.fulfill({ json: { challenge_id: "fresh-challenge" } });
+  });
+  await page.goto(`/interview#invite=${token}`);
+  await expect(
+    page.getByRole("button", { name: "Send verification code" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Send verification code" }).click();
+  await expect(page.getByLabel("Verification code")).toBeVisible();
+  await page.getByRole("button", { name: "Request a new code" }).click();
+  await page.getByRole("button", { name: "Send verification code" }).click();
+  await expect(page.getByLabel("Verification code")).toBeVisible();
+  expect(requestedTokens).toEqual([token, token]);
+  expect(previousSessionRequests).toBe(0);
+  expect(new URL(page.url()).hash).toBe("");
+});
+
+test("explicit resume link does not open a different candidate session", async ({
+  page,
+}) => {
+  await page.route("**/api/candidate/me", (route) =>
+    route.fulfill({
+      json: { application_id: "previous-interview" },
+    }),
+  );
+  await page.goto("/interview#resume=requested-interview");
+  await expect(
+    page.getByRole("button", { name: "Send verification code" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Interview reference")).toHaveValue(
+    "requested-interview",
+  );
+  await expect(page.getByLabel("Email address")).toBeVisible();
+});
+
 test("completed feedback explains missing suggestions and shows final answer evidence", async ({
   page,
 }) => {

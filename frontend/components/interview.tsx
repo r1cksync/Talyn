@@ -77,33 +77,51 @@ export default function Interview() {
   const clockOffset = useRef(0);
   const turnComplete = useRef<() => void>(() => {});
   const audioPlayer = useRef<HTMLAudioElement | null>(null);
+  const requestedAccess = useRef<{
+    token: string;
+    applicationId: string;
+  } | null>(null);
   const updateSession = useCallback((s: Session) => {
     clockOffset.current = Date.parse(s.server_time) - Date.now();
     currentSession.current = s;
     setSession(s);
   }, []);
-  const loadInfo = useCallback(async () => {
-    const data = await api("/candidate/me", {}, true);
-    setCsrf(data.csrf, true);
-    setInfo(data);
-    setRecordConsent(data.recording_required);
-    if (data.session) updateSession(data.session);
-    localStorage.setItem("talyn-resume-application", data.application_id);
-    if (data.session) {
-      setSegments(await api("/candidate/transcript", {}, true));
-    }
-  }, [updateSession]);
+  const loadInfo = useCallback(
+    async (expectedApplicationId?: string) => {
+      const data = await api("/candidate/me", {}, true);
+      if (
+        expectedApplicationId &&
+        data.application_id !== expectedApplicationId
+      )
+        throw new Error("Verify access to the requested interview.");
+      setCsrf(data.csrf, true);
+      setInfo(data);
+      setRecordConsent(data.recording_required);
+      if (data.session) updateSession(data.session);
+      localStorage.setItem("talyn-resume-application", data.application_id);
+      if (data.session) {
+        setSegments(await api("/candidate/transcript", {}, true));
+      }
+    },
+    [updateSession],
+  );
   useEffect(() => {
     const hash = new URLSearchParams(location.hash.slice(1));
-    const token = hash.get("invite") || "";
+    const access = requestedAccess.current || {
+      token: hash.get("invite") || "",
+      applicationId: hash.get("resume") || "",
+    };
+    requestedAccess.current = access;
+    const token = access.token;
     const appId =
-      hash.get("resume") ||
+      access.applicationId ||
       localStorage.getItem("talyn-resume-application") ||
       "";
     setInvite((previous) => token || previous);
     setResume(appId);
     history.replaceState(null, "", location.pathname);
-    void loadInfo().catch(() => setInfo(null));
+    if (token) setInfo(null);
+    else void loadInfo(access.applicationId).catch(() => setInfo(null));
     return () => {
       socket.current?.close();
       stream.current?.getTracks().forEach((t) => t.stop());
@@ -590,7 +608,6 @@ export default function Interview() {
                   variant="ghost"
                   onClick={() => {
                     setChallenge("");
-                    setInvite("");
                   }}
                 >
                   Request a new code
