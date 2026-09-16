@@ -2,6 +2,8 @@
 
 Status: implemented. Project: `talyn`. Region: `ap-south-1`.
 
+HTTP database dependencies use FastAPI `scope="function"` so their transaction commits before a success response leaves the server. Request-scoped teardown can send success before commit and race the next request. A regression test reads the new job from an independent database connection at the response boundary. WebSocket and worker sessions have their own explicit transaction lifetimes. See [FastAPI dependency scope](https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#early-exit-and-scope).
+
 ## Authorized changes during implementation
 
 The user has no domain and authorized an AWS-generated test address. CloudFront terminates public HTTPS and connects privately through a VPC origin to an internal ALB. Caching is disabled; cookies and WebSocket headers are forwarded. No domain purchase is needed. The original public HTTPS ALB path remains available with a custom domain/certificate.

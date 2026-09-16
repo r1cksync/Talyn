@@ -105,13 +105,13 @@ def check_csrf(request: Request, auth):
             raise HTTPException(403, "CSRF token rejected")
 
 
-def manager(request: Request, db: Session = Depends(get_db)):
+def manager(request: Request, db: Session = Depends(get_db, scope="function")):
     auth = session_from_token(db, request.cookies.get("talyn_manager"), "manager")
     check_csrf(request, auth)
     return auth
 
 
-def candidate(request: Request, db: Session = Depends(get_db)):
+def candidate(request: Request, db: Session = Depends(get_db, scope="function")):
     from .models import Application
 
     auth = session_from_token(db, request.cookies.get("talyn_candidate"), "candidate")

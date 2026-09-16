@@ -62,7 +62,7 @@ def as_dict(row, fields):
 
 
 @router.post("/organizations", status_code=201)
-def create_org(data: OrgInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def create_org(data: OrgInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     org = Organization(
         name=data.name,
         retention_days=settings().retention_days,
@@ -78,14 +78,14 @@ def create_org(data: OrgInput, auth=Depends(manager), db: Session = Depends(get_
 
 
 @router.post("/organizations/{org_id}/select")
-def select_org(org_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def select_org(org_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, org_id)
     auth.org_id = org_id
     return {"org_id": org_id}
 
 
 @router.get("/organization")
-def get_org(auth=Depends(manager), db: Session = Depends(get_db)):
+def get_org(auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     member = membership(db, auth)
     org = db.get(Organization, member.org_id)
     members = db.scalars(select(Membership).where(Membership.org_id == org.id)).all()
@@ -101,7 +101,7 @@ def get_org(auth=Depends(manager), db: Session = Depends(get_db)):
 
 
 @router.patch("/organization")
-def update_org(data: OrgSettingsInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def update_org(data: OrgSettingsInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     member = membership(db, auth, owner=True)
     org = db.get(Organization, member.org_id)
     org.retention_days = data.retention_days
@@ -110,7 +110,7 @@ def update_org(data: OrgSettingsInput, auth=Depends(manager), db: Session = Depe
 
 
 @router.post("/organization/members", status_code=201)
-def add_member(data: MemberInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def add_member(data: MemberInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, owner=True)
     if settings().mode == "aws":
         users = aws("cognito-idp").list_users(
@@ -139,14 +139,14 @@ def add_member(data: MemberInput, auth=Depends(manager), db: Session = Depends(g
 
 
 @router.get("/jobs")
-def jobs(auth=Depends(manager), db: Session = Depends(get_db)):
+def jobs(auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     rows = db.scalars(select(Job).where(Job.org_id == auth.org_id).order_by(Job.created_at.desc())).all()
     return [as_dict(j, "id title description seniority skills duration_minutes status created_at") for j in rows]
 
 
 @router.post("/jobs", status_code=201)
-def create_job(data: JobInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def create_job(data: JobInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     if len({c.name for c in data.criteria}) != len(data.criteria):
         raise HTTPException(422, "Criteria names must be unique")
@@ -160,7 +160,7 @@ def create_job(data: JobInput, auth=Depends(manager), db: Session = Depends(get_
 
 
 @router.get("/jobs/{job_id}")
-def job_detail(job_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def job_detail(job_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     job = owned(db, Job, job_id, auth.org_id)
     criteria = db.scalars(select(Criterion).where(Criterion.job_id == job.id, Criterion.org_id == auth.org_id)).all()
@@ -196,7 +196,9 @@ def add_candidate(db, org_id, job_id, data):
 
 
 @router.post("/jobs/{job_id}/candidates", status_code=201)
-def create_candidate(job_id: str, data: CandidateInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def create_candidate(
+    job_id: str, data: CandidateInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
+):
     membership(db, auth, write=True)
     owned(db, Job, job_id, auth.org_id)
     app = add_candidate(db, auth.org_id, job_id, data)
@@ -205,7 +207,9 @@ def create_candidate(job_id: str, data: CandidateInput, auth=Depends(manager), d
 
 
 @router.post("/jobs/{job_id}/import")
-async def import_candidates(job_id: str, request: Request, auth=Depends(manager), db: Session = Depends(get_db)):
+async def import_candidates(
+    job_id: str, request: Request, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
+):
     membership(db, auth, write=True)
     owned(db, Job, job_id, auth.org_id)
     body = await request.body()
@@ -214,17 +218,17 @@ async def import_candidates(job_id: str, request: Request, auth=Depends(manager)
     try:
         rows = list(csv.DictReader(io.StringIO(body.decode("utf-8-sig"))))
         if not rows or len(rows) > 100 or set(rows[0]) != {"name", "email"}:
-            raise ValueError("Expected name,email columns and 1–100 rows")
+            raise ValueError("Expected name,email columns and 1â€“100 rows")
         candidates = [CandidateInput.model_validate(r) for r in rows]
     except Exception as exc:
-        raise HTTPException(422, "Use UTF-8 CSV with name,email columns and 1–100 valid rows") from exc
+        raise HTTPException(422, "Use UTF-8 CSV with name,email columns and 1â€“100 valid rows") from exc
     ids = [add_candidate(db, auth.org_id, job_id, c).id for c in candidates]
     audit(db, auth.org_id, auth.subject, "candidates.imported", job_id, {"count": len(ids)})
     return {"count": len(ids), "application_ids": ids}
 
 
 @router.get("/jobs/{job_id}/applications")
-def applications(job_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def applications(job_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     owned(db, Job, job_id, auth.org_id)
     apps = db.scalars(
@@ -254,7 +258,9 @@ def applications(job_id: str, auth=Depends(manager), db: Session = Depends(get_d
 
 
 @router.post("/applications/{application_id}/documents", status_code=201)
-def upload_document(application_id: str, data: DocumentInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def upload_document(
+    application_id: str, data: DocumentInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
+):
     membership(db, auth, write=True)
     app = owned(db, Application, application_id, auth.org_id)
     if app.status not in {"new", "preparing"}:
@@ -275,7 +281,7 @@ def upload_document(application_id: str, data: DocumentInput, auth=Depends(manag
 
 
 @router.post("/documents/{document_id}/complete")
-def complete_document(document_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def complete_document(document_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     doc = owned(db, Document, document_id, auth.org_id)
     if doc.status == "pending":
@@ -285,7 +291,7 @@ def complete_document(document_id: str, auth=Depends(manager), db: Session = Dep
 
 
 @router.delete("/documents/{document_id}")
-def remove_failed_document(document_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def remove_failed_document(document_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     doc = owned(db, Document, document_id, auth.org_id)
     if doc.status not in {"pending", "error"}:
@@ -295,7 +301,7 @@ def remove_failed_document(document_id: str, auth=Depends(manager), db: Session 
 
 
 @router.get("/documents/{document_id}/extraction")
-def extraction(document_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def extraction(document_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     doc = owned(db, Document, document_id, auth.org_id)
     result = db.scalar(select(Extraction).where(Extraction.document_id == doc.id, Extraction.org_id == auth.org_id))
@@ -308,7 +314,7 @@ def extraction(document_id: str, auth=Depends(manager), db: Session = Depends(ge
 
 
 @router.post("/applications/{application_id}/prepare", status_code=202)
-def prepare(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def prepare(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     app = owned(db, Application, application_id, auth.org_id)
     if app.status not in {"new", "preparing"}:
@@ -322,7 +328,7 @@ def prepare(application_id: str, auth=Depends(manager), db: Session = Depends(ge
 
 
 @router.get("/applications/{application_id}/plan")
-def plan_detail(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def plan_detail(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     owned(db, Application, application_id, auth.org_id)
     plan, questions = questions_for(db, application_id, auth.org_id)
@@ -339,7 +345,9 @@ def plan_detail(application_id: str, auth=Depends(manager), db: Session = Depend
 
 
 @router.put("/applications/{application_id}/plan")
-def edit_plan(application_id: str, data: PlanEdit, auth=Depends(manager), db: Session = Depends(get_db)):
+def edit_plan(
+    application_id: str, data: PlanEdit, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
+):
     membership(db, auth, write=True)
     app = owned(db, Application, application_id, auth.org_id, lock=True)
     if app.status not in {"prepared", "approved"}:
@@ -359,7 +367,7 @@ def edit_plan(application_id: str, data: PlanEdit, auth=Depends(manager), db: Se
         raise HTTPException(422, "Preserve job competency names across candidates")
     for d in data.dimensions:
         if set(d.anchors) != {"1", "2", "3", "4", "5"}:
-            raise HTTPException(422, "Define scoring anchors 1–5")
+            raise HTTPException(422, "Define scoring anchors 1â€“5")
     db.execute(delete(Question).where(Question.plan_id == plan.id, Question.org_id == auth.org_id))
     for i, q in enumerate(data.questions):
         db.add(Question(org_id=auth.org_id, plan_id=plan.id, position=i, **q.model_dump()))
@@ -380,7 +388,7 @@ def edit_plan(application_id: str, data: PlanEdit, auth=Depends(manager), db: Se
 
 
 @router.post("/jobs/{job_id}/campaigns", status_code=201)
-def launch(job_id: str, data: CampaignInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def launch(job_id: str, data: CampaignInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     owned(db, Job, job_id, auth.org_id)
     existing = db.scalar(
@@ -422,7 +430,7 @@ def launch(job_id: str, data: CampaignInput, auth=Depends(manager), db: Session 
 
 
 @router.post("/applications/{application_id}/revoke")
-def revoke(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def revoke(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     app = owned(db, Application, application_id, auth.org_id, lock=True)
     app.revoked = True
@@ -450,7 +458,7 @@ def revoke(application_id: str, auth=Depends(manager), db: Session = Depends(get
 
 
 @router.post("/applications/{application_id}/accommodation")
-def approve_accommodation(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def approve_accommodation(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     app = owned(db, Application, application_id, auth.org_id)
     app.recording_required = False
@@ -459,7 +467,7 @@ def approve_accommodation(application_id: str, auth=Depends(manager), db: Sessio
 
 
 @router.get("/reports")
-def list_reports(auth=Depends(manager), db: Session = Depends(get_db)):
+def list_reports(auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     rows = db.execute(
         select(Application, Candidate, Job)
@@ -480,7 +488,7 @@ def list_reports(auth=Depends(manager), db: Session = Depends(get_db)):
 
 
 @router.get("/applications/{application_id}/report")
-def report_detail(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def report_detail(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     app = owned(db, Application, application_id, auth.org_id)
     session = db.scalar(
@@ -550,7 +558,9 @@ def report_detail(application_id: str, auth=Depends(manager), db: Session = Depe
 
 
 @router.patch("/reports/{report_id}")
-def annotate_report(report_id: str, data: NoteInput, auth=Depends(manager), db: Session = Depends(get_db)):
+def annotate_report(
+    report_id: str, data: NoteInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
+):
     membership(db, auth, write=True)
     report = owned(db, Report, report_id, auth.org_id, lock=True)
     if report.audience != "manager":
@@ -579,7 +589,7 @@ def annotate_report(report_id: str, data: NoteInput, auth=Depends(manager), db: 
 
 @router.patch("/observations/{observation_id}/dismiss")
 def dismiss_observation(
-    observation_id: str, data: ExplanationInput, auth=Depends(manager), db: Session = Depends(get_db)
+    observation_id: str, data: ExplanationInput, auth=Depends(manager), db: Session = Depends(get_db, scope="function")
 ):
     membership(db, auth, write=True)
     observation = owned(db, VideoObservation, observation_id, auth.org_id)
@@ -589,7 +599,7 @@ def dismiss_observation(
 
 
 @router.get("/deliveries")
-def deliveries(auth=Depends(manager), db: Session = Depends(get_db)):
+def deliveries(auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth)
     rows = db.scalars(
         select(EmailDelivery)
@@ -607,7 +617,7 @@ def deliveries(auth=Depends(manager), db: Session = Depends(get_db)):
 
 
 @router.post("/background-jobs/{job_id}/retry")
-def retry_job(job_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def retry_job(job_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, write=True)
     job = owned(db, AsyncJob, job_id, auth.org_id)
     if job.status != "dead":
@@ -619,7 +629,7 @@ def retry_job(job_id: str, auth=Depends(manager), db: Session = Depends(get_db))
 
 
 @router.delete("/applications/{application_id}", status_code=202)
-def delete_application(application_id: str, auth=Depends(manager), db: Session = Depends(get_db)):
+def delete_application(application_id: str, auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     membership(db, auth, owner=True)
     app = owned(db, Application, application_id, auth.org_id)
     if app.status == "interviewing":

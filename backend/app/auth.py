@@ -25,7 +25,7 @@ def cognito():
 
 
 @router.post("/register", status_code=202)
-def register(data: Credentials, request: Request, db: Session = Depends(get_db)):
+def register(data: Credentials, request: Request, db: Session = Depends(get_db, scope="function")):
     auth_origin(request)
     rate_limit(db, "register:" + request.client.host, 5, 3600)
     if settings().mode == "demo":
@@ -43,7 +43,7 @@ def register(data: Credentials, request: Request, db: Session = Depends(get_db))
 
 
 @router.post("/verify")
-def verify(data: VerifyRegistration, request: Request, db: Session = Depends(get_db)):
+def verify(data: VerifyRegistration, request: Request, db: Session = Depends(get_db, scope="function")):
     auth_origin(request)
     rate_limit(db, "verify:" + request.client.host, 10, 600)
     if settings().mode != "aws":
@@ -67,7 +67,7 @@ def login_response(db, response, subject, email):
 
 
 @router.post("/login")
-def login(data: Credentials, request: Request, response: Response, db: Session = Depends(get_db)):
+def login(data: Credentials, request: Request, response: Response, db: Session = Depends(get_db, scope="function")):
     auth_origin(request)
     rate_limit(db, "login:" + request.client.host, 15, 300)
     if settings().mode != "aws":
@@ -90,7 +90,7 @@ def login(data: Credentials, request: Request, response: Response, db: Session =
 
 
 @router.post("/demo")
-def demo(request: Request, response: Response, db: Session = Depends(get_db)):
+def demo(request: Request, response: Response, db: Session = Depends(get_db, scope="function")):
     auth_origin(request)
     if settings().mode != "demo":
         raise HTTPException(404)
@@ -99,7 +99,7 @@ def demo(request: Request, response: Response, db: Session = Depends(get_db)):
 
 
 @router.get("/me")
-def me(auth=Depends(manager), db: Session = Depends(get_db)):
+def me(auth=Depends(manager), db: Session = Depends(get_db, scope="function")):
     memberships = db.scalars(select(Membership).where(Membership.subject == auth.subject)).all()
     return {
         "csrf": auth.csrf,

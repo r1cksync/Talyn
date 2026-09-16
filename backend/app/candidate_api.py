@@ -75,7 +75,7 @@ def issue_challenge(db, invite):
 
 
 @router.post("/access/request", status_code=202)
-def request_access(data: InviteInput, request: Request, db: Session = Depends(get_db)):
+def request_access(data: InviteInput, request: Request, db: Session = Depends(get_db, scope="function")):
     origin(request)
     rate_limit(db, "invite-ip:" + request.client.host, 15, 600)
     rate_limit(db, "invite-token:" + digest(data.token), 3, 600)
@@ -94,7 +94,7 @@ class ResumeInput(StrictModel):
 
 
 @router.post("/access/resume", status_code=202)
-def request_resume(data: ResumeInput, request: Request, db: Session = Depends(get_db)):
+def request_resume(data: ResumeInput, request: Request, db: Session = Depends(get_db, scope="function")):
     origin(request)
     rate_limit(db, "resume-ip:" + request.client.host, 10, 600)
     rate_limit(db, "resume-app:" + data.application_id, 3, 600)
@@ -115,7 +115,9 @@ def request_resume(data: ResumeInput, request: Request, db: Session = Depends(ge
 
 
 @router.post("/access/verify")
-def verify_access(data: ChallengeInput, request: Request, response: Response, db: Session = Depends(get_db)):
+def verify_access(
+    data: ChallengeInput, request: Request, response: Response, db: Session = Depends(get_db, scope="function")
+):
     origin(request)
     rate_limit(db, "challenge-ip:" + request.client.host, 20, 600)
     challenge = db.scalar(select(EmailChallenge).where(EmailChallenge.id == data.challenge_id).with_for_update())
@@ -159,7 +161,7 @@ def verify_access(data: ChallengeInput, request: Request, response: Response, db
 
 
 @router.get("/me")
-def candidate_info(auth=Depends(candidate), db: Session = Depends(get_db)):
+def candidate_info(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     app = owned(db, Application, auth.application_id, auth.org_id)
     job = owned(db, Job, app.job_id, auth.org_id)
     person = owned(db, Candidate, app.candidate_id, auth.org_id)
@@ -183,7 +185,7 @@ def candidate_info(auth=Depends(candidate), db: Session = Depends(get_db)):
 
 
 @router.post("/consent")
-def consent(data: ConsentInput, auth=Depends(candidate), db: Session = Depends(get_db)):
+def consent(data: ConsentInput, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     app = owned(db, Application, auth.application_id, auth.org_id)
     if data.policy_version != settings().consent_policy:
         raise HTTPException(409, "Reload and review the current data-processing disclosure")
@@ -206,7 +208,7 @@ def consent(data: ConsentInput, auth=Depends(candidate), db: Session = Depends(g
 
 
 @router.post("/accommodation", status_code=202)
-def accommodation(data: AccommodationInput, auth=Depends(candidate), db: Session = Depends(get_db)):
+def accommodation(data: AccommodationInput, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     app = owned(db, Application, auth.application_id, auth.org_id)
     app.accommodation = data.request
     audit(db, auth.org_id, auth.subject, "accommodation.requested", app.id)
@@ -214,7 +216,7 @@ def accommodation(data: AccommodationInput, auth=Depends(candidate), db: Session
 
 
 @router.post("/start")
-def start(auth=Depends(candidate), db: Session = Depends(get_db)):
+def start(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     return session_state(db, start_session(db, auth))
 
 
@@ -230,13 +232,13 @@ def current_session(db, auth, active=False):
 
 
 @router.get("/session")
-def get_session(auth=Depends(candidate), db: Session = Depends(get_db)):
+def get_session(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     return session_state(db, session)
 
 
 @router.get("/transcript")
-def get_transcript(auth=Depends(candidate), db: Session = Depends(get_db)):
+def get_transcript(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     segments = db.scalars(
         select(TranscriptSegment)
@@ -259,7 +261,7 @@ def get_transcript(auth=Depends(candidate), db: Session = Depends(get_db)):
 
 
 @router.post("/demo-answer")
-def demo_answer(data: DemoAnswer, auth=Depends(candidate), db: Session = Depends(get_db)):
+def demo_answer(data: DemoAnswer, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     if settings().mode != "demo":
         raise HTTPException(404)
     session = current_session(db, auth, active=True)
@@ -278,7 +280,7 @@ def demo_answer(data: DemoAnswer, auth=Depends(candidate), db: Session = Depends
 
 
 @router.post("/turn")
-def turn(data: TurnInput, auth=Depends(candidate), db: Session = Depends(get_db)):
+def turn(data: TurnInput, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     sid, oid = session.id, auth.org_id
     db.commit()  # Do not hold a row lock across a model call.
@@ -286,14 +288,14 @@ def turn(data: TurnInput, auth=Depends(candidate), db: Session = Depends(get_db)
 
 
 @router.post("/finish")
-def finish(auth=Depends(candidate), db: Session = Depends(get_db)):
+def finish(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     finish_session(db, session, "candidate_finished")
     return session_state(db, session)
 
 
 @router.get("/speech")
-def speech(auth=Depends(candidate), db: Session = Depends(get_db)):
+def speech(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth, active=True)
     state = session_state(db, session)
     text = state["question"]["text"]
@@ -310,7 +312,7 @@ def speech(auth=Depends(candidate), db: Session = Depends(get_db)):
 
 
 @router.post("/recordings", status_code=201)
-def recording_upload(data: ClipInput, auth=Depends(candidate), db: Session = Depends(get_db)):
+def recording_upload(data: ClipInput, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     consent = db.scalar(
         select(Consent).where(Consent.application_id == auth.application_id, Consent.org_id == auth.org_id)
@@ -359,7 +361,7 @@ def recording_upload(data: ClipInput, auth=Depends(candidate), db: Session = Dep
 
 
 @router.post("/recordings/{recording_id}/complete")
-def recording_complete(recording_id: str, auth=Depends(candidate), db: Session = Depends(get_db)):
+def recording_complete(recording_id: str, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     obj = owned(db, RecordingObject, recording_id, auth.org_id)
     if obj.session_id != session.id:
@@ -370,7 +372,7 @@ def recording_complete(recording_id: str, auth=Depends(candidate), db: Session =
 
 
 @router.post("/recordings/finalize-manifest")
-def finalize_manifest(data: ManifestInput, auth=Depends(candidate), db: Session = Depends(get_db)):
+def finalize_manifest(data: ManifestInput, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     rows = db.scalars(
         select(RecordingObject)
@@ -398,7 +400,7 @@ def finalize_manifest(data: ManifestInput, auth=Depends(candidate), db: Session 
 
 
 @router.get("/recordings/status")
-def recordings_status(auth=Depends(candidate), db: Session = Depends(get_db)):
+def recordings_status(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     rows = db.scalars(
         select(RecordingObject).where(RecordingObject.session_id == session.id, RecordingObject.org_id == auth.org_id)
@@ -410,7 +412,7 @@ def recordings_status(auth=Depends(candidate), db: Session = Depends(get_db)):
 
 
 @router.post("/frames", status_code=202)
-async def frame(request: Request, auth=Depends(candidate), db: Session = Depends(get_db)):
+async def frame(request: Request, auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth, active=True)
     consent = db.scalar(
         select(Consent).where(Consent.application_id == auth.application_id, Consent.org_id == auth.org_id)
@@ -430,7 +432,7 @@ async def frame(request: Request, auth=Depends(candidate), db: Session = Depends
 
 
 @router.get("/observations")
-def observations(auth=Depends(candidate), db: Session = Depends(get_db)):
+def observations(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     rows = db.scalars(
         select(VideoObservation).where(
@@ -447,7 +449,10 @@ def observations(auth=Depends(candidate), db: Session = Depends(get_db)):
 
 @router.patch("/observations/{observation_id}/explanation")
 def explain_observation(
-    observation_id: str, data: ExplanationInput, auth=Depends(candidate), db: Session = Depends(get_db)
+    observation_id: str,
+    data: ExplanationInput,
+    auth=Depends(candidate),
+    db: Session = Depends(get_db, scope="function"),
 ):
     session = current_session(db, auth)
     observation = owned(db, VideoObservation, observation_id, auth.org_id)
@@ -458,7 +463,7 @@ def explain_observation(
 
 
 @router.get("/report")
-def candidate_report(auth=Depends(candidate), db: Session = Depends(get_db)):
+def candidate_report(auth=Depends(candidate), db: Session = Depends(get_db, scope="function")):
     session = current_session(db, auth)
     report = db.scalar(
         select(Report)

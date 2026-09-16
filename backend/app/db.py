@@ -30,6 +30,8 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 
 def get_db():
+    # All HTTP dependencies use scope="function": commit before sending success.
+    # Background jobs and WebSockets own their sessions independently.
     with SessionLocal() as db:
         try:
             yield db
