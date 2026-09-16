@@ -2,7 +2,7 @@
 
 | Symptom | Check and recovery |
 |---|---|
-| Preparation or report pending | Review application job status, worker logs and SQS/DLQ alarms. Check Bedrock authorization/quota/model/role. Retry the failed job after correcting its cause; checkpoints reuse completed nodes. |
+| Preparation or report pending | Review application job status, worker logs and SQS/DLQ alarms. For Groq, check model availability, rate limits and Secrets Manager injection; for optional Bedrock, check account authorization/quota/model/role. Retry the failed job after correcting its cause; checkpoints reuse completed nodes. |
 | Extraction fails | Check 10 MB PDF/DOCX limit, corruption, encryption and readable text. Replace the failed upload. Scanned PDFs need Textract; OCR defaults to a 10-page cap. |
 | Invitation fails | Invitations expire in seven days and exchange once. Resume with application ID plus email OTP; revoked applications cannot resume. Never copy tokens/OTPs into support logs. |
 | Audio disconnects | Check microphone/network and reconnect. Final captions persist; a new stream uses a new timeline offset. A stale connection lease expires in 30 seconds. Finite deployment drains cannot guarantee uninterrupted speech. |
@@ -12,6 +12,8 @@
 | Email missing | Check SES verification, sandbox, recipient allowlist, bounce/complaint suppression, SNS subscription and event queue. Demo notifications are simulated. |
 | Login fails | Use a verified manager email. Password policy: 12 characters, upper/lowercase, digit and symbol. Check Cognito pool/client/region. Reauthenticate after a stale session expires. |
 | Start returns 429 | Organization concurrency or monthly minutes exhausted. Starting reserves full duration; finishing releases unused minutes. Usage resets on the first start in each UTC month. |
+| HTTPS fails | Check the gateway through SSM, nginx health, certificate lifetime and `talyn-tls.timer`. Port 80 must remain reachable for ACME renewal. See the certificate checks below. |
+| Signed upload fails | Verify the URL hostname includes the bucket region. Legacy global S3 endpoints can redirect new buckets, breaking signatures/CORS. Check size, SHA-256 checksum and five-minute URL expiry. |
 | Deployment health fails | Check migration logs, database TLS/network, secret/KMS grants, image SHA and ALB targets. Public task subnets require AWS endpoint/image egress. |
 
 Outbox jobs commit with product changes. Worker leases/idempotency prevent ordinary replay duplicates. A crash after SES accepts email but before the delivery ID commits can resend it; this is not exactly-once delivery. SQS carries identifiers, not transcripts or tokens. Email bodies are encrypted in the database.
@@ -21,3 +23,19 @@ Application retention defaults to 30 days, including inactive applications; comp
 Monitor API/worker/web CPU, ALB errors, database storage and dead letters. Confirm a monitored SNS subscriber. Ordinary logs omit tokens, request bodies, document text, transcripts and prompts. Usage tracks interview/transcription minutes, model calls/tokens, speech characters, storage, frames, OCR and emails.
 
 For PostgreSQL acceptance, create a separate `talyn_test` database and set `TALYN_TEST_DATABASE_URL=postgresql+psycopg://.../talyn_test`, then `uv run pytest -q`. Tests reset that database and refuse other names. CI creates a disposable PostgreSQL service.
+
+## IP certificate checks
+
+Use Systems Manager Session Manager or Run Command on the stack's `IpGatewayInstance`; SSH is disabled. These commands contain no credentials:
+
+```sh
+systemctl status nginx talyn-tls.timer
+systemctl list-timers talyn-tls.timer
+openssl x509 -enddate -noout -in /etc/letsencrypt/live/talyn-ip/cert.pem
+journalctl -u talyn-tls.service --since '24 hours ago'
+/opt/talyn-certbot/bin/certbot renew --dry-run --no-random-sleep-on-renew
+```
+
+The short-lived certificate is checked every four hours. The bootstrap/renewal service reloads nginx and publishes `Talyn/TLS / CertificateSecondsRemaining`; the alarm treats missing data and less than 24 hours remaining as failures. The staging renewal dry run passed on 16 September 2026. Confirm the SNS alert subscription in the selected inbox so these alarms reach a person.
+
+The gateway is currently in the VPC's second public subnet (`ap-south-1b`): this account's first AZ had no T2 capacity. Gateway user-data changes replace the instance while preserving the Elastic IP, causing a brief interruption. Avoid deploying during interviews; even ordinary API rolling updates can interrupt a live utterance.

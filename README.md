@@ -2,7 +2,9 @@
 
 An AWS-hosted, multi-tenant AI interview workspace. Managers approve a consistent rubric, candidates complete a consent-based interview, and reports link assessments to transcript evidence. Hiring decisions remain with people.
 
-The synthetic application runs locally end to end. The user selected Groq inference because this AWS account blocks Bedrock. Real Groq extraction, plans, follow-ups and evidence-linked reporting passed a synthetic workflow. AWS deployment is in progress using a static IP with trusted HTTPS (CloudFront is also account-blocked). See [verification status](docs/STATUS.md). Synthetic results are always labeled.
+**Live development site: https://13.204.206.74**. Choose **Open your workspace** to sign in or create an account. The complete real-provider cloud interview test passed using synthetic data and SES simulator recipients. [Verification evidence](docs/acceptance.md) separates live checks from local fixtures and production prerequisites.
+
+The user selected Groq because this AWS account blocks Bedrock. Groq inference is configured server-side in Secrets Manager; HTTPS uses a static IP and trusted certificate because no domain is available and CloudFront is account-blocked. The local synthetic demo runs separately, with clearly labeled fixture results.
 
 Stack: Next.js / React / TypeScript, FastAPI / SQLAlchemy / Alembic, LangGraph, PostgreSQL and AWS CDK. Runtime integrates Cognito, S3, Transcribe Streaming, Polly, SES, SQS and Rekognition. LLM inference supports Bedrock and the explicitly authorized Groq alternative. Groq sends planning/answer text outside AWS, disclosed before consent.
 

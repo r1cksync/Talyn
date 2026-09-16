@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Target: `talyn`, Mumbai (`ap-south-1`). Foundation resources are provisioned, including the private database, storage, queues and Cognito. The SES sender is verified. Runtime deployment and acceptance are tracked in [STATUS](STATUS.md). Expected baseline: roughly US$120–150/month; US$150 is an alert, not a spending cap.
+Target: `talyn`, Mumbai (`ap-south-1`). The development site is deployed at https://13.204.206.74, including private database/storage, queues, Cognito and the application services. The SES sender is verified. The complete real-provider synthetic interview passed; see [STATUS](STATUS.md) and [acceptance](acceptance.md). Expected baseline: roughly US$120–150/month; US$150 is an alert, not a spending cap.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ The free Groq pilot allows two concurrent interviews per organization. Ten concu
 
 Run `uv run python ../scripts/run_cloud_acceptance.py --credential-csv PATH_TO_LOCAL_CSV` from backend after runtime deployment. This launches one bounded Fargate task using a simulator-only Cognito user and separately injected secret. It verifies HTTPS login, signed S3 documents, SQS extraction, Groq preparation and reports, SES simulator invitation/OTP, public HTTPS/WebSocket PCM streaming through Transcribe, Polly playback, recorded clips and report audience separation. It expires the synthetic application after one day and never prints credentials or invitation tokens. This task requires operator IAM/Cognito/ECS/Secrets Manager permissions; these administrative permissions are not granted to the application.
 
-The generated-media protocol check does not substitute for real-browser device testing. Also verify signup/email verification, scanned-PDF Textract, delivered Rekognition observations, bounce/complaint events, alarms and restore procedures before production. Ten simultaneous live sessions remain outside the free two-interview Groq pilot. See STATUS for checks actually completed.
+The generated-media protocol check does not substitute for real-browser device testing. Also verify signup/email verification, scanned-PDF Textract, live bounce/complaint events, alarms and restore procedures before production. Ten simultaneous live sessions remain outside the free two-interview Groq pilot. See STATUS for checks actually completed.
 
 ## Rollback and recovery
 
