@@ -44,3 +44,11 @@ Three known SES setup notifications from the earlier dead-letter queue were retu
 ## Limits
 
 Generated media was used for the live protocol test. Scanned-PDF OCR, live bounce/complaint simulation, real-inbox signup, Safari/Firefox, backup restore and ten simultaneous live AWS interviews were not verified. Ten simultaneous deterministic workflows passed locally. Single tasks, a single gateway, single-AZ RDS and the free Groq quota are development constraints.
+
+## Candidate feedback and fresh practice interview
+
+On 16 September 2026, image `b6982ef` added candidate/role/date context, clear empty-state feedback, final answer transcripts and next-step guidance. New invitation links take precedence over an existing candidate cookie; explicit resume links cannot silently open another application. Verification retry controls do not submit the form. Five CI browser tests passed, and three targeted browser checks passed against the public frontend using mocked candidate responses (not a second live interview).
+
+A separate ten-minute Backend Engineer practice job was created through the same demo recruiter account, with a fictional DOCX resume, successful S3 extraction and an approved plan covering technical reasoning, problem solving and collaboration. Questions explicitly treat the fictional projects as scenarios. The original completed sample was preserved.
+
+The requested college recipient was verified with SES. The first send exposed a missing recipient-identity IAM permission in sandbox mode. Infrastructure commit `882b85e` adds only configured recipient identities while retaining the fixed sender condition and application allowlist; CDK diff showed one IAM policy change. After the permission-only deployment, the existing failed outbox job was retried. SES reported `delivered`, and the invitation was independently confirmed in the recipient's Inbox at 13:43 UTC. The application remained `invited`, with no interview started by the agent. Recipient details, resume and operator evidence remain in ignored local files.
