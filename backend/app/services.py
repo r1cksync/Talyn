@@ -85,7 +85,7 @@ def prepare_application(org_id, application_id):
                 ],
             },
             "documents": [
-                {"text": e.text, "sources": [{**s, "ref": f"{e.document_id}:{s['ref']}"} for s in e.sources]}
+                {"sources": [{**s, "ref": f"{e.document_id}:{s['ref']}"} for s in e.sources]}
                 for e in extracts
             ],
         }

@@ -15,6 +15,7 @@ from .checkpoints import checkpoint_store
 from .config import settings
 from .db import SessionLocal
 from .document_extract import isolated_extract
+from .errors import WorkflowError, public_job_error, retryable_error
 from .models import (
     Application,
     AsyncJob,
@@ -328,14 +329,20 @@ def process_job(job_id):
                 job.status, job.locked_until, job.error = "done", None, ""
         return True
     except Exception as exc:
-        logger.warning("job_failed kind=%s error_type=%s", kind, type(exc).__name__)
+        logger.warning(
+            "job_failed job_id=%s kind=%s error_type=%s error_code=%s",
+            job_id,
+            kind,
+            type(exc).__name__,
+            exc.code if isinstance(exc, WorkflowError) else "unexpected",
+        )
         with SessionLocal.begin() as db:
             job = db.get(AsyncJob, job_id)
             if job:
-                job.status = "dead" if job.attempts >= 3 else "pending"
+                job.status = "dead" if job.attempts >= 3 or not retryable_error(exc) else "pending"
                 job.locked_until, job.published_at = None, None
                 job.available_at = now() + timedelta(seconds=min(60, 2**job.attempts))
-                job.error = type(exc).__name__ + ": inspect operational guidance"
+                job.error = public_job_error(exc)
                 if kind == "email":
                     delivery = db.get(EmailDelivery, target_id)
                     if delivery:

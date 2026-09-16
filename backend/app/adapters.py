@@ -151,6 +151,10 @@ Return a single JSON object matching the given schema, with no markdown."""
 
 
 class Models:
+    def validate_input(self, schema, instruction, payload):
+        if settings().mode == "aws" and settings().llm_provider == "groq":
+            self.groq_request(schema, instruction, payload)
+
     def structured(self, schema, instruction, payload, fixture):
         if settings().mode == "demo":
             return schema.model_validate(fixture), {"inputTokens": 0, "outputTokens": 0}
@@ -176,7 +180,7 @@ class Models:
         # Never repair arbitrary prose into a successful result. Retry is bounded by graph policy and usage budget.
         return schema.model_validate_json(text), response.get("usage", {})
 
-    def groq_structured(self, schema, instruction, payload):
+    def groq_request(self, schema, instruction, payload):
         # Fixed provider endpoint; untrusted content cannot choose a URL or enable tools.
         request = {
             "model": settings().groq_model_id,
@@ -198,9 +202,13 @@ class Models:
         }
         # Bound free-tier requests; reject overlarge inputs explicitly instead of silently dropping evidence.
         if len(json.dumps(request)) > 24000:
-            raise ValueError(
-                "Model input exceeds the development provider limit; use shorter synthetic documents/interviews"
-            )
+            from .errors import WorkflowError
+
+            raise WorkflowError("model_input_too_large")
+        return request
+
+    def groq_structured(self, schema, instruction, payload):
+        request = self.groq_request(schema, instruction, payload)
         with httpx.Client(timeout=httpx.Timeout(60, connect=5)) as client:
             for attempt in range(3):
                 response = client.post(

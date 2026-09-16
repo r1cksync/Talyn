@@ -10,13 +10,16 @@ from sqlalchemy import func, select
 from .adapters import models
 from .config import settings
 from .db import SessionLocal
+from .errors import WorkflowError, retryable_error
 from .models import Application, Usage
 from .schemas import EvaluationOutput, ExtractedClaims, FollowupOutput, PlanOutput
 
-RETRY = RetryPolicy(max_attempts=2, initial_interval=1, retry_on=Exception)
+RETRY = RetryPolicy(max_attempts=2, initial_interval=1, retry_on=retryable_error)
 
 
 def model_call(state, schema, instruction, payload, fixture):
+    # A local input rejection never reaches the provider and must not consume its call allowance.
+    models.validate_input(schema, instruction, payload)
     # Reserve a call before invoking the provider. A crashed attempt still consumes budget.
     call_id = str(uuid4())
     with SessionLocal.begin() as db:
@@ -28,12 +31,12 @@ def model_call(state, schema, instruction, payload, fixture):
         if not app or app.revoked:
             raise ValueError("Application authorization failed")
         count = db.scalar(
-            select(func.count(Usage.id)).where(
+            select(func.coalesce(func.sum(Usage.quantity), 0)).where(
                 Usage.application_id == app.id, Usage.org_id == app.org_id, Usage.meter == "model_calls"
             )
         )
         if count >= settings().max_model_calls:
-            raise ValueError("Model call budget exhausted")
+            raise WorkflowError("model_budget_exhausted")
         db.add(Usage(org_id=app.org_id, application_id=app.id, meter="model_calls", quantity=1, dedupe_key=call_id))
     result, usage = models.structured(schema, instruction, payload, fixture)
     with SessionLocal.begin() as db:
@@ -63,6 +66,12 @@ class PrepareState(TypedDict, total=False):
     transitions: list[str]
 
 
+def source_documents(state):
+    # Sources already contain all extracted text with citation identifiers. Older
+    # checkpoints also contain a duplicate full-text field; do not resend it.
+    return [{"sources": document["sources"]} for document in state["documents"]]
+
+
 def preparation_graph(checkpointer):
     graph = StateGraph(PrepareState)
 
@@ -80,7 +89,7 @@ def preparation_graph(checkpointer):
             state,
             ExtractedClaims,
             "Extract relevant factual claims with provided source references.",
-            {"documents": state["documents"]},
+            {"documents": source_documents(state)},
             fixture,
         )
         refs = {s["ref"] for s in sources}
@@ -140,7 +149,7 @@ def preparation_graph(checkpointer):
                 state,
                 PlanOutput,
                 "Generate grounded personalized questions. Retain the given competencies; do not change evaluation standards.",
-                {"job": state["job"], "claims": state["claims"], "sources": docs},
+                {"job": state["job"], "claims": state["claims"], "sources": source_documents(state)},
                 fixture,
             )
             additions = [q for q in result["questions"] if q["kind"] == "personalized"][:2]
