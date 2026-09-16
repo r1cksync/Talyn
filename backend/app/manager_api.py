@@ -218,10 +218,10 @@ async def import_candidates(
     try:
         rows = list(csv.DictReader(io.StringIO(body.decode("utf-8-sig"))))
         if not rows or len(rows) > 100 or set(rows[0]) != {"name", "email"}:
-            raise ValueError("Expected name,email columns and 1â€“100 rows")
+            raise ValueError("Expected name,email columns and 1–100 rows")
         candidates = [CandidateInput.model_validate(r) for r in rows]
     except Exception as exc:
-        raise HTTPException(422, "Use UTF-8 CSV with name,email columns and 1â€“100 valid rows") from exc
+        raise HTTPException(422, "Use UTF-8 CSV with name,email columns and 1–100 valid rows") from exc
     ids = [add_candidate(db, auth.org_id, job_id, c).id for c in candidates]
     audit(db, auth.org_id, auth.subject, "candidates.imported", job_id, {"count": len(ids)})
     return {"count": len(ids), "application_ids": ids}
@@ -367,7 +367,7 @@ def edit_plan(
         raise HTTPException(422, "Preserve job competency names across candidates")
     for d in data.dimensions:
         if set(d.anchors) != {"1", "2", "3", "4", "5"}:
-            raise HTTPException(422, "Define scoring anchors 1â€“5")
+            raise HTTPException(422, "Define scoring anchors 1–5")
     db.execute(delete(Question).where(Question.plan_id == plan.id, Question.org_id == auth.org_id))
     for i, q in enumerate(data.questions):
         db.add(Question(org_id=auth.org_id, plan_id=plan.id, position=i, **q.model_dump()))
