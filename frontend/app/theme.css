@@ -420,6 +420,95 @@ td,
   color: var(--bg);
 }
 
+.feedback-facts {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 18px;
+  padding: 22px 0;
+  margin: 22px 0;
+  border-block: 1px solid var(--line);
+}
+.feedback-facts dt {
+  font: 10px var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.feedback-facts dd {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.candidate-feedback {
+  margin-top: 28px;
+}
+.feedback-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.feedback-section {
+  margin-top: 28px;
+}
+.feedback-section > h3,
+.feedback-card > h3,
+.feedback-next > h3 {
+  margin-bottom: 12px;
+}
+.feedback-section > .actions {
+  margin-bottom: 16px;
+}
+.feedback-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+.feedback-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  min-width: 0;
+}
+.feedback-card .bullet-list {
+  margin: 0;
+}
+.feedback-empty {
+  color: var(--muted);
+}
+.feedback-answer {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+}
+.feedback-answer summary {
+  cursor: pointer;
+  padding: 16px;
+  font: 11px var(--mono);
+  text-transform: uppercase;
+}
+.feedback-answer p {
+  padding: 0 16px 16px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.feedback-next {
+  margin-top: 28px;
+  padding: 20px;
+  background: var(--lavender);
+  border-left: 3px solid var(--purple);
+}
+.feedback-next p + p {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .feedback-facts,
+  .feedback-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Public landing page */
 .landing h2,
 .landing h3 {

@@ -17,6 +17,7 @@ import {
 import { api, post, setCsrf, readable } from "@/lib/api";
 import { ClipRecorder, recordingType, recoverRecording } from "@/lib/recording";
 import { Badge, Brand, Button, ErrorNotice, Loading } from "./ui";
+import { CandidateFeedback } from "./candidate-feedback";
 
 type Segment = {
   id: string;
@@ -607,43 +608,44 @@ export default function Interview() {
               <h1>Your story has been heard.</h1>
               <p>
                 Your interview is complete. The hiring team will review the
-                evidence and make their own decision.{" "}
-                {mediaStatus.includes("Clip") || mediaStatus.includes("verif")
-                  ? mediaStatus
-                  : ""}
+                evidence and make their own decision.
               </p>
+              <dl className="feedback-facts">
+                <div>
+                  <dt>Candidate</dt>
+                  <dd>{info.name}</dd>
+                </div>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{info.job_title}</dd>
+                </div>
+                <div>
+                  <dt>Interview date</dt>
+                  <dd>
+                    {new Date(session.started_at).toLocaleDateString(
+                      undefined,
+                      { day: "numeric", month: "short", year: "numeric" },
+                    )}
+                  </dd>
+                </div>
+              </dl>
+              {(mediaStatus.includes("Clip") ||
+                mediaStatus.includes("verif")) && (
+                <Badge
+                  tone={
+                    mediaStatus === "Recording verified" ? "green" : "amber"
+                  }
+                >
+                  {mediaStatus}
+                </Badge>
+              )}
               {!feedback ? (
                 <div className="notice info" style={{ marginTop: 20 }}>
                   Your feedback is being prepared. You may close this page and
                   return through your report notification.
                 </div>
               ) : (
-                <>
-                  <Badge tone={feedback.synthetic ? "amber" : "purple"}>
-                    {feedback.synthetic
-                      ? "Synthetic, AI-generated feedback"
-                      : "AI-generated feedback"}
-                  </Badge>
-                  <h3 style={{ marginTop: 24 }}>What we covered</h3>
-                  <div className="actions" style={{ marginTop: 10 }}>
-                    {feedback.competencies.map((c: string) => (
-                      <Badge key={c}>{c}</Badge>
-                    ))}
-                  </div>
-                  <p style={{ marginTop: 18 }}>{feedback.feedback}</p>
-                  <h3 style={{ marginTop: 22 }}>Strengths</h3>
-                  <ul className="bullet-list">
-                    {feedback.strengths.map((s: string) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
-                  <h3>For your next conversation</h3>
-                  <ul className="bullet-list">
-                    {feedback.suggestions.map((s: string) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
-                </>
+                <CandidateFeedback feedback={feedback} segments={segments} />
               )}
               {observations.length > 0 && (
                 <>
