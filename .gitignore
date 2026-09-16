@@ -24,3 +24,5 @@ test-results/
 *.key
 !.github/**
 task.txt
+*.tsbuildinfo
+frontend/test-fixtures/

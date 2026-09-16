@@ -235,8 +235,8 @@ def evaluate_application(org_id, application_id):
             db.add(Report(org_id=org_id, session_id=initial["session_id"], audience=audience, content=report.model_dump()))
         person = owned(db, Candidate, app.candidate_id, org_id)
         queue_email(db, org_id, person.email, "candidate_report", f"candidate-report:{app.id}:1",
-            "Your Talyn interview feedback is ready", "Your AI-generated feedback is ready. Open your interview link and verify your email to view it. "
-            "Your feedback is private to you. No hiring decision is made by Talyn.")
+            "Your Talyn interview feedback is ready", "Your AI-generated feedback is ready. Verify your email to view it: "
+            f"{settings().public_url}/interview#resume={app.id}\nYour feedback is private to you. No hiring decision is made by Talyn.")
         managers = db.scalars(select(Membership).where(Membership.org_id == org_id, Membership.role.in_(["owner", "recruiter"]))).all()
         for member in managers:
             queue_email(db, org_id, member.email, "manager_report", f"manager-report:{app.id}:1:{member.id}",

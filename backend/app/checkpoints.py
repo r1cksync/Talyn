@@ -10,7 +10,7 @@ from .config import settings
 @contextmanager
 def checkpoint_store():
     conf = settings()
-    if conf.mode == "demo":
+    if conf.mode == "demo" and not conf.checkpoint_url:
         with sqlite3.connect(conf.data_dir / "checkpoints.db", check_same_thread=False, timeout=30) as conn:
             yield SqliteSaver(conn)
     else:
