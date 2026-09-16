@@ -17,6 +17,7 @@ jobs:
       TALYN_DOMAIN: ${{ vars.TALYN_DOMAIN }}
       TALYN_CERTIFICATE_ARN: ${{ vars.TALYN_CERTIFICATE_ARN }}
       TALYN_SENDER_EMAIL: ${{ vars.TALYN_SENDER_EMAIL }}
+      TALYN_ADDITIONAL_EMAIL_RECIPIENTS: ${{ vars.TALYN_ADDITIONAL_EMAIL_RECIPIENTS }}
       TALYN_ALERT_EMAIL: ${{ vars.TALYN_ALERT_EMAIL }}
       TALYN_LLM_PROVIDER: ${{ vars.TALYN_LLM_PROVIDER || 'bedrock' }}
       TALYN_GROQ_SECRET_ARN: ${{ vars.TALYN_GROQ_SECRET_ARN }}
@@ -59,6 +60,7 @@ jobs:
             -c runtime=true \
             -c "domain=$TALYN_DOMAIN" -c "certificateArn=$TALYN_CERTIFICATE_ARN" \
             -c "senderEmail=$TALYN_SENDER_EMAIL" -c "imageTag=$IMAGE_TAG" \
+            -c "additionalEmailRecipients=$TALYN_ADDITIONAL_EMAIL_RECIPIENTS" \
             -c "alertEmail=$TALYN_ALERT_EMAIL" \
             -c "llmProvider=$TALYN_LLM_PROVIDER" -c "groqSecretArn=$TALYN_GROQ_SECRET_ARN" \
             --outputs-file deployment-outputs.json

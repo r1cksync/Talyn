@@ -654,6 +654,29 @@ export class Runtime extends Construct {
         resources: ["*"],
       }),
     );
+    const additionalRecipients = String(
+      this.node.tryGetContext("additionalEmailRecipients") || "",
+    )
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+    if (
+      additionalRecipients.length > 20 ||
+      additionalRecipients.some(
+        (email) => !/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(email),
+      )
+    ) {
+      throw new Error(
+        "additionalEmailRecipients must contain at most 20 valid email addresses",
+      );
+    }
+    const emailAllowlist = Array.from(
+      new Set([
+        props.senderEmail.toLowerCase(),
+        "success@simulator.amazonses.com",
+        ...additionalRecipients,
+      ]),
+    ).join(",");
     const environment = {
       TALYN_MODE: "aws",
       TALYN_LLM_PROVIDER: llmProvider,
@@ -672,8 +695,7 @@ export class Runtime extends Construct {
       TALYN_SENDER_EMAIL: props.senderEmail,
       TALYN_SES_CONFIGURATION_SET: configSet.configurationSetName,
       TALYN_LIVE_EMAIL: "false",
-      TALYN_EMAIL_ALLOWLIST:
-        props.senderEmail + ",success@simulator.amazonses.com",
+      TALYN_EMAIL_ALLOWLIST: emailAllowlist,
       LANGSMITH_TRACING: "false",
       LANGCHAIN_TRACING_V2: "false",
     };

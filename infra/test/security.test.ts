@@ -5,7 +5,12 @@ import { Foundation, Runtime } from "../lib/stacks";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 
 test("IP HTTPS gateway keeps the origin private and renews its certificate", () => {
-  const app = new App({ context: { ingress: "ip" } });
+  const app = new App({
+    context: {
+      ingress: "ip",
+      additionalEmailRecipients: "Candidate@example.com, candidate@example.com",
+    },
+  });
   const foundation = new Foundation(app, "IpFoundation", {
     env: { account: "111111111111", region: "ap-south-1" },
   });
@@ -15,6 +20,20 @@ test("IP HTTPS gateway keeps the origin private and renews its certificate", () 
     imageTag: "fixture",
   });
   const template = Template.fromStack(foundation);
+  template.hasResourceProperties("AWS::ECS::TaskDefinition", {
+    ContainerDefinitions: Match.arrayWith([
+      Match.objectLike({
+        Environment: Match.arrayWith([
+          { Name: "TALYN_LIVE_EMAIL", Value: "false" },
+          {
+            Name: "TALYN_EMAIL_ALLOWLIST",
+            Value:
+              "sender@example.com,success@simulator.amazonses.com,candidate@example.com",
+          },
+        ]),
+      }),
+    ]),
+  });
   template.resourceCountIs("AWS::CloudFront::Distribution", 0);
   template.resourceCountIs("AWS::EC2::EIP", 1);
   template.hasResourceProperties("AWS::ElasticLoadBalancingV2::LoadBalancer", {
