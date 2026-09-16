@@ -566,7 +566,11 @@ export default function Interview() {
                   <ArrowRight size={15} />
                 </Button>
                 {invite && (
-                  <Button variant="ghost" onClick={() => setInvite("")}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setInvite("")}
+                  >
                     Already started? Resume with email
                   </Button>
                 )}
@@ -605,6 +609,7 @@ export default function Interview() {
                   Verify and continue
                 </Button>
                 <Button
+                  type="button"
                   variant="ghost"
                   onClick={() => {
                     setChallenge("");
