@@ -24,7 +24,7 @@ from sqlalchemy import select
 from .adapters import aws
 from .config import settings
 from .db import SessionLocal
-from .models import Application, EmailDelivery, now
+from .models import Application, AsyncJob, EmailDelivery, now
 from .security import decrypt
 
 
@@ -280,6 +280,16 @@ def main():
             state = call(candidate, "POST", "/candidate/turn", {"turn": state["turn"]})
         call(candidate, "POST", "/candidate/finish")
         passed("cloudfront_websocket_pcm_transcribe_polly_interview")
+
+        def frame_processed():
+            with SessionLocal() as db:
+                job = db.scalar(select(AsyncJob).where(AsyncJob.org_id == oid, AsyncJob.kind == "frame"))
+                if job and job.status == "dead":
+                    raise RuntimeError("Synthetic Rekognition frame job exhausted retries")
+                return job and job.status == "done"
+
+        wait_for(frame_processed)
+        passed("rekognition_synthetic_frame_processed")
         wait_for(
             lambda: call(candidate, "POST", "/candidate/recordings/finalize-manifest", {"expected_clips": 1})[
                 "finalized"
