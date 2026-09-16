@@ -41,7 +41,9 @@ export function ipGateway(
   );
   const gateway = new ec2.Instance(scope, "IpGateway", {
     vpc,
-    vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    // EC2 reported T2 capacity unavailable in this account's first AZ and
+    // explicitly recommended ap-south-1b, the VPC's second public subnet.
+    vpcSubnets: { subnets: [vpc.publicSubnets[1]] },
     securityGroup: security,
     // This account's regional EC2 quota is one vCPU; T2 micro fits that limit.
     instanceType: new ec2.InstanceType("t2.micro"),
