@@ -1,8 +1,8 @@
 # Implementation and verification status
 
-Updated 16 September 2026. **Development URL: https://13.204.206.74**. The AWS environment is deployed; the complete generated-media cloud interview acceptance passed. This is a development pilot with the limits below.
+Updated 17 September 2026. **AWS deployment retired at the owner's request.** The former development IP is no longer a Talyn endpoint. The source and local synthetic demo remain available. The evidence below describes checks completed before teardown; see the [teardown record](teardown.md) for the final AWS state and preserved S3 data.
 
-The current deployed image is `231417c`, including complete candidate feedback, correct selection of new invitations, the audio/database contention fix, and recoverable recording uploads. Public feedback/access/recovery browser checks passed on this image. Infrastructure commit `882b85e` retains scoped SES permissions for configured sandbox recipients. Evidence is recorded in [acceptance](acceptance.md). Implementation, fixture testing and real provider verification are distinguished here.
+The last deployed image was `2d49b3d`, including the preparation request-size and call-allowance fix, candidate feedback, invitation selection, audio/database contention fixes, and recoverable recording uploads. The earlier public feedback/access/recovery checks ran on `231417c`. Evidence is recorded in [acceptance](acceptance.md). Implementation, fixture testing and historical real-provider verification are distinguished here.
 
 | Milestone | Implemented and tested | Live AWS verification |
 |---|---|---|
@@ -15,7 +15,7 @@ The current deployed image is `231417c`, including complete candidate feedback, 
 | Infrastructure and UI | CDK assertions/synthesis, Docker, complete synthetic browser journey | Three Fargate services, private ALB and IP TLS gateway deployed; trusted HTTPS verified |
 | Nightshift reference design | Landing and shared manager/candidate theme; self-hosted fonts; 1440px/390px checks | Deployed; public desktop/mobile navigation, workspace and browser S3 upload passed |
 
-## Checks and operational state
+## Historical checks before teardown
 
 - The complete browser suite passed: seven tests covering the end-to-end interview, responsive landing, feedback empty states and transcripts, invitation precedence, explicit resume selection, paused-upload recovery and completed-interview recovery without camera access. Five targeted checks also passed against the deployed frontend using fixture API responses. Three audio resampling tests passed. Next.js production build and TypeScript checks passed.
 - GitHub CI runs backend suites on both SQLite and PostgreSQL, migrations, browser tests and three CDK infrastructure suites. It synthesizes the IP, optional custom-domain and optional CloudFront paths. Final CI: 23 passed/four PostgreSQL-only skips on SQLite, 27 passed on PostgreSQL, seven browser tests, three audio tests and three infrastructure suites. Source CI `35106972865` passed; application deployment `35107365477` passed. All three ECS services are healthy on image `231417c`.

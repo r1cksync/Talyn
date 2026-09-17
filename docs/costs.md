@@ -1,6 +1,6 @@
 # Development resource plan and cost assumptions
 
-Plan prepared before provisioning and updated 16 September 2026. Region `ap-south-1` (Mumbai). Project tag `Project=talyn`. The development environment is deployed and incurs charges. Runtime/acceptance status is in [STATUS](STATUS.md). Synthetic Polly/Transcribe requests were made; AWS determines their metered charge.
+Historical deployment estimate, updated 16 September 2026. Region `ap-south-1` (Mumbai). Project tag `Project=talyn`. The AWS runtime was retired on 17 September 2026; the estimates below are not current running infrastructure. See [teardown](teardown.md) for preserved S3 storage, its encryption-key dependency and charges already accrued. Historical runtime/acceptance status is in [STATUS](STATUS.md).
 
 ## Concrete resource plan
 

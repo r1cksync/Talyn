@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Target: `talyn`, Mumbai (`ap-south-1`). The development site is deployed at https://13.204.206.74, including private database/storage, queues, Cognito and the application services. The SES sender is verified. The complete real-provider synthetic interview passed; see [STATUS](STATUS.md) and [acceptance](acceptance.md). Expected baseline: roughly US$120–150/month; US$150 is an alert, not a spending cap.
+Target: `talyn`, Mumbai (`ap-south-1`). **The AWS environment was retired on 17 September 2026 at the owner's request; the former development IP is no longer a Talyn endpoint.** The deployment workflow is disabled. The instructions below describe creating a new environment, not an existing live deployment. See [teardown](teardown.md), [STATUS](STATUS.md), and historical [acceptance](acceptance.md). The previous development baseline estimate was roughly US$120–150/month; a budget alert is not a spending cap.
 
 ## Prerequisites
 
@@ -55,4 +55,6 @@ GitHub OIDC uses this repository's immutable subject prefix from `gh api repos/r
 
 Local: `docker compose stop` preserves database/media volumes. No automatic deletion occurs.
 
-AWS: inventory only `TalynFoundation` / `Project=talyn` resources, export needed data and review the resource plan first. RDS deletion protection intentionally blocks teardown. S3, ECR, Cognito, KMS, secrets and logs can be retained after stack deletion and require separate deliberate cleanup. Check backup expiration and retained resource charges. Never run blanket account cleanup. No unrelated resources were modified or deleted.
+For a future AWS teardown, inventory the authorized scope first. RDS deletion protection blocks removal until deliberately disabled. S3, ECR, Cognito, KMS, secrets and logs can survive stack deletion and require separate cleanup decisions. Preserve encryption keys needed by retained S3 objects; deleting such a key makes those objects unreadable. Verify backups, retained storage and global resources as well as running instances.
+
+On 17 September 2026 the owner explicitly authorized account-wide cleanup beyond Talyn, with S3 excluded. The recorded cleanup follows that expanded instruction. Do not reuse its account-wide scope for a future request without equivalent authorization. A future deployment requires fresh bootstrap/runtime resources and explicit re-enabling of the GitHub deployment workflow.

@@ -1,5 +1,7 @@
 # Development acceptance evidence
 
+Historical evidence: the AWS environment was retired on 17 September 2026. The former IP below is no longer a Talyn endpoint; see [teardown](teardown.md).
+
 Date: 16 September 2026. Region: `ap-south-1`. URL: **https://13.204.206.74**. Repository: `r1cksync/Talyn`, branch `main`.
 
 ## Complete real-provider workflow

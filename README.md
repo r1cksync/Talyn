@@ -1,16 +1,16 @@
 # Talyn
 
-An AWS-hosted, multi-tenant AI interview workspace. Managers approve a consistent rubric, candidates complete a consent-based interview, and reports link assessments to transcript evidence. Hiring decisions remain with people.
+A deployable, multi-tenant AI interview workspace. Managers approve a consistent rubric, candidates complete a consent-based interview, and reports link assessments to transcript evidence. Hiring decisions remain with people.
 
-**Live development site: https://13.204.206.74**. Choose **Open your workspace** to sign in or create an account. The complete real-provider cloud interview test passed using synthetic data and SES simulator recipients. [Verification evidence](docs/acceptance.md) separates live checks from local fixtures and production prerequisites.
+**AWS deployment retired on 17 September 2026 at the owner's request.** The former development IP is no longer a Talyn endpoint. Source code and the local demo remain available. See the [teardown record](docs/teardown.md) for preserved S3 data and the remaining encryption dependency. [Verification evidence](docs/acceptance.md) records the tests performed before teardown.
 
-The user selected Groq because this AWS account blocks Bedrock. Groq inference is configured server-side in Secrets Manager; HTTPS uses a static IP and trusted certificate because no domain is available and CloudFront is account-blocked. The local synthetic demo runs separately, with clearly labeled fixture results.
+The previous deployment used the owner-authorized Groq alternative because the account blocked Bedrock, with its key held in Secrets Manager. HTTPS used a static IP and trusted certificate because no domain was available and CloudFront was account-blocked. The local synthetic demo runs separately, with clearly labeled fixture results.
 
 Stack: Next.js / React / TypeScript, FastAPI / SQLAlchemy / Alembic, LangGraph, PostgreSQL and AWS CDK. Runtime integrates Cognito, S3, Transcribe Streaming, Polly, SES, SQS and Rekognition. LLM inference supports Bedrock and the explicitly authorized Groq alternative. Groq sends planning/answer text outside AWS, disclosed before consent.
 
 ## Architecture
 
-The diagrams cover the deployed application and its deployment, security and operations services. Regional resources run in **ap-south-1 (Mumbai)**. Solid arrows show active flows or dependencies; dashed arrows show administration, provisioning or explicitly labelled optional paths. Resource coverage was checked against the live `TalynFoundation` and `CDKToolkit` CloudFormation stacks and the application service integrations.
+The diagrams document the architecture verified before teardown, including deployment, security and operations services in **ap-south-1 (Mumbai)**. Solid arrows show application flows or dependencies; dashed arrows show administration, provisioning or explicitly labelled optional paths. Resource coverage was checked against the then-live `TalynFoundation` and `CDKToolkit` stacks and the application service integrations. The diagrams do not indicate currently running AWS resources.
 
 ### Interview and data flow
 
